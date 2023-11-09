@@ -6,4 +6,9 @@ public with sharing class TL_Ring_Tests {
     TL_Ring_SendRequest.sendSMS('23423', '23432', 'messageTest');
   }
 
+  @IsTest
+  static void getCallLogs() {
+    TL_Ring_SendRequest.retrieveAllLogsAndInsert();
+  }
+
 }

@@ -18,11 +18,11 @@ public with sharing class TL_Ring_SendRequest {
   public static HttpResponse sendRequest(HttpRequest req){
     Http http = new Http();
     HttpResponse res;
-    if(Test.isRunningTest()){
-      res = new HttpResponse();
-      res.setBody('{}');
-    }
-    else res = http.send(req);
+     if(Test.isRunningTest()){
+       res = new HttpResponse();
+       res.setBody('{}');
+     }
+    res = http.send(req);
     return res;
   }
 
@@ -36,7 +36,8 @@ public with sharing class TL_Ring_SendRequest {
     req.setBody('{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}');
     HttpResponse res = sendRequest(req);
   }
-
+  
+  @future(callout=true)
   public static void retrieveAllLogsAndInsert() {
     String endpoint = 'https://platform.devtest.ringcentral.com/restapi/v1.0/account/~/extension/~/call-log?view=Detailed';
 
