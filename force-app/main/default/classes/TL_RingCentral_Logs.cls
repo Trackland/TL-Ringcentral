@@ -1,5 +1,16 @@
 public with sharing class TL_RingCentral_Logs {
 
+    @InvocableMethod(label='Get Call Logs' description='Get the ring central call logs')
+    public static void getLogs(variables[] vars){
+        String credName = vars[0].credName;
+        String type = vars[0].type;
+        if (type == 'call') {
+            retrieveAllLogsAndInsert(credName);
+        } else {
+            System.debug('Invalid type');
+        }    
+    }
+
     @future(callout=true)
     public static void retrieveAllLogsAndInsert(String credName) {
         String endpoint = '/v1.0/account/~/extension/~/call-log';
@@ -54,5 +65,13 @@ public with sharing class TL_RingCentral_Logs {
             System.debug('The records list is Empty.');
             return null;
         }
-    }    
+    }   
+    
+    public class variables{
+        @InvocableVariable(label='type' description='Type' required=true)
+        public String type;
+        @InvocableVariable(label='CredName' description='Credential Name of Custome Metadata' required=true)
+        public String credName;        
+    }
+    
 }

@@ -24,6 +24,7 @@ public with sharing class TL_RingCentral_Request {
         HttpResponse res = sendRequest(req);
         Map<String, Object> resObj = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         cred.token__c = (string)resObj.get('access_token');
+        System.debug(res.getBody());
         System.debug(cred.token__c);
         if(cred.token__c == null && Test.isRunningTest()) {
             cred.token__c = 'testToken';

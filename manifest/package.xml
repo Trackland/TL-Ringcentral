@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <name>TL_Ring_SendRequest</name>
+        <members>TL_RingCentral_Request</members> 
+        <name>ApexClass</name>
     </types>
     <version>58.0</version>
 </Package>

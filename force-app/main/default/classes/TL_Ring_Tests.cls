@@ -59,7 +59,7 @@ public with sharing class TL_Ring_Tests {
   }
 
   @IsTest
-  static void getCallLogs() {
+  static void TestGetCallLogs() {
     dataInit();    
     Test.setMock(HttpCalloutMock.class, new GetLogsMock()); 
     Test.startTest();
@@ -68,7 +68,7 @@ public with sharing class TL_Ring_Tests {
   }
 
   @isTest
-    static void testRetrieveCallLogs() {
+    static void TestRetrieveCallLogs() {
         List<Call_Log__c> callLogsToInsert = new List<Call_Log__c>();
         callLogsToInsert.add(createCallLog(
             'AYtyfnCj5tNDDUA',

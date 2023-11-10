@@ -2,16 +2,19 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "package": "RingCentral",
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
-      "default": false,
+      "default": true,
+      "package": "TL_RingCentral",
+      "versionName": "ver 0.3",
+      "versionNumber": "0.3.0.NEXT",
       "versionDescription": ""
     }
   ],
-  "namespace": "tlnd",
+  "namespace": null,
   "sourceApiVersion": "55.0",
   "packageAliases": {
-    "RingCentral": "0HoRQ00000000T30AI"
+    "TL_RingCentral": "0HoRQ00000000RR0AY",
+    "TL_RingCentral@0.1.0-1": "04tRQ0000000JHBYA2",
+    "TL_RingCentral@0.2.0-1": "04tRQ0000000JKPYA2",
+    "TL_RingCentral@0.3.0-1": "04tRQ0000000JQrYAM"
   }
 }
