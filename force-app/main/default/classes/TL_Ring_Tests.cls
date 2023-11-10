@@ -63,7 +63,7 @@ public with sharing class TL_Ring_Tests {
     dataInit();    
     Test.setMock(HttpCalloutMock.class, new GetLogsMock()); 
     Test.startTest();
-    TL_RingCentral_Logs.retrieveAllLogsAndInsert(null);
+    TL_RingCentral_Logs.retrieveAllLogsAndInsert(null, null, null, 1, 1000);
     Test.stopTest();   
   }
 
