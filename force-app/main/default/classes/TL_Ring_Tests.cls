@@ -3,6 +3,41 @@ public with sharing class TL_Ring_Tests {
 
   public static RingCredential__mdt cred;
 
+  public static Call_Log__c createCallLog(
+    String id,
+    String sessionId,
+    String uri,
+    String action,
+    String direction,
+    Integer duration,
+    String fromLocation,
+    String fromName,
+    String fromPhoneNumber,
+    String result,
+    String toName,
+    String toPhoneNumber,
+    String type,
+    Datetime startTime
+) {
+    Call_Log__c log = new Call_Log__c(
+        Log_Id__c = id,
+        Session_Id__c = sessionId,
+        Record_Url__c = uri,
+        Action__c = action,
+        Direction__c = direction,
+        Duration__c = duration,
+        From_Location__c = fromLocation,
+        From_Name__c = fromName,
+        From_Phone_Number__c = fromPhoneNumber,
+        Result__c = result,
+        To_Name__c = toName,
+        To_Phone_Number__c = toPhoneNumber,
+        Type__c = type,
+        Start_Time__c = startTime
+    );
+    return log;
+}
+
   @IsTest
   static void TestGetToken(){
     dataInit();
@@ -31,6 +66,34 @@ public with sharing class TL_Ring_Tests {
     TL_RingCentral_Logs.retrieveAllLogsAndInsert(null);
     Test.stopTest();   
   }
+
+  @isTest
+    static void testRetrieveCallLogs() {
+        List<Call_Log__c> callLogsToInsert = new List<Call_Log__c>();
+        callLogsToInsert.add(createCallLog(
+            'AYtyfnCj5tNDDUA',
+            '18674468005',
+            'https://platform.devtest.ringcentral.com/restapi/v1.0/account/826906005/extension/826906005/call-log/AYtyfnCj5tNDDUA?view=Detailed',
+            'RingOut Web',
+            'Outbound',
+            6,
+            null,
+            'Spencer Rose',
+            '+13215236699',
+            'Stopped',
+            null,
+            '+13214567788',
+            'Voice',
+            Datetime.newInstance(2023, 11, 9, 20, 53, 59)
+        ));
+        insert callLogsToInsert;
+        
+        Test.startTest();
+        List<Call_Log__c> callLogs = TL_RingCentral_Logs.retrieveCallLogs();
+        Test.stopTest();
+        
+        System.assertEquals(1, callLogs.size(), 'One call log expected');
+    }
 
   public class GetTokenMock implements HttpCalloutMock {
     public HTTPResponse respond(HTTPRequest req) {

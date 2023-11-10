@@ -41,7 +41,7 @@ public with sharing class TL_RingCentral_Logs {
         }     
     }
 
-    public static void retrieveCallLogs() {
+    public static List<Call_Log__c> retrieveCallLogs() {
         List<Call_Log__c> callLogs = new List<Call_Log__c>();
         callLogs = [SELECT Id, Session_Id__c, Record_Url__c, Action__c, Direction__c, Duration__c, From_Location__c, From_Name__c, From_Phone_Number__c, Result__c, To_Name__c, To_Phone_Number__c, Type__c, Start_Time__c, Log_Id__c FROM Call_Log__c];
     
@@ -49,8 +49,10 @@ public with sharing class TL_RingCentral_Logs {
           for (Call_Log__c callLog : callLogs) {
             System.debug('Log ID: ' + callLog);
           }
+          return callLogs;
         } else {
             System.debug('The records list is Empty.');
+            return null;
         }
     }    
 }
