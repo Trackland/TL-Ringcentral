@@ -19,17 +19,18 @@ public with sharing class TL_Ring_Tests {
     dataInit();
     Test.setMock(HttpCalloutMock.class, new SendSMSMock()); 
     Test.startTest();
-    TL_RingCentral_SMS.send('23423', '23432', 'messageTest');
+    TL_RingCentral_SMS.send('23423', '23432', 'messageTest', null);
     Test.stopTest();
   }
 
-  // @IsTest
-  // static void getCallLogs() {
-  //   Test.setMock(HttpCalloutMock.class, new GetLogsMock()); 
-  //   Test.startTest();
-  //   TL_Ring_SendRequest.retrieveAllLogsAndInsert();
-  //   Test.stopTest();
-  // }
+  @IsTest
+  static void getCallLogs() {
+    dataInit();    
+    Test.setMock(HttpCalloutMock.class, new GetLogsMock()); 
+    Test.startTest();
+    TL_RingCentral_Logs.retrieveAllLogsAndInsert(null);
+    Test.stopTest();   
+  }
 
   public class GetTokenMock implements HttpCalloutMock {
     public HTTPResponse respond(HTTPRequest req) {

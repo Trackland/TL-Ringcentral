@@ -1,9 +1,9 @@
 public with sharing class TL_RingCentral_Logs {
 
     @future(callout=true)
-    public static void retrieveAllLogsAndInsert() {
+    public static void retrieveAllLogsAndInsert(String credName) {
         String endpoint = '/v1.0/account/~/extension/~/call-log';
-        String responseBody = TL_RingCentral_Request.send(endpoint, '', 'BullOakProduction', 'GET');
+        String responseBody = TL_RingCentral_Request.send(endpoint, '', credName, 'GET');
         Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
 
         List<Object> records = (List<Object>) jsonResponse.get('records');
