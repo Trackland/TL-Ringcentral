@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "TL_RingCentral",
-      "versionName": "ver 0.3",
-      "versionNumber": "0.3.0.NEXT",
+      "versionName": "ver 0.6",
+      "versionNumber": "0.6.0.NEXT",
       "versionDescription": ""
     }
   ],
@@ -15,6 +15,13 @@
     "TL_RingCentral": "0HoRQ00000000RR0AY",
     "TL_RingCentral@0.1.0-1": "04tRQ0000000JHBYA2",
     "TL_RingCentral@0.2.0-1": "04tRQ0000000JKPYA2",
-    "TL_RingCentral@0.3.0-1": "04tRQ0000000JQrYAM"
+    "TL_RingCentral@0.3.0-1": "04tRQ0000000JQrYAM",
+    "TL_RingCentral@0.4.0-4": "04tRQ0000000JyjYAE",
+    "TL_RingCentral@0.5.0-1": "04tRQ0000000K0LYAU",
+    "TL_RingCentral@0.5.0-2": "04tRQ0000000K1xYAE",
+    "TL_RingCentral@0.5.0-3": "04tRQ0000000K3ZYAU",
+    "TL_RingCentral@0.5.0-5": "04tRQ0000000K8PYAU",
+    "TL_RingCentral@0.5.0-6": "04tRQ0000000KDFYA2",
+    "TL_RingCentral@0.6.0-1": "04tRQ0000000KI5YAM"
   }
 }

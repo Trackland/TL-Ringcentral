@@ -51,19 +51,27 @@ public with sharing class TL_Ring_Tests {
 
   @IsTest
   static void TestSMS(){
+    TL_RingCentral_SMS.variables testVariables = new TL_RingCentral_SMS.variables();
+    testVariables.credName = null;
+    testVariables.fromPhone = '+13214567788';
+    testVariables.toPhone = '+123456789';
+    testVariables.message = 'messageTest';
     dataInit();
     Test.setMock(HttpCalloutMock.class, new SendSMSMock()); 
     Test.startTest();
-    TL_RingCentral_SMS.send('23423', '23432', 'messageTest', null);
+    TL_RingCentral_SMS.send(new List<TL_RingCentral_SMS.variables>{ testVariables });
     Test.stopTest();
   }
 
   @IsTest
   static void TestGetCallLogs() {
+    TL_RingCentral_Logs.variables testVariables = new TL_RingCentral_Logs.variables();
+    testVariables.credName = null;
+    testVariables.type = 'call';
     dataInit();    
     Test.setMock(HttpCalloutMock.class, new GetLogsMock()); 
     Test.startTest();
-    TL_RingCentral_Logs.retrieveAllLogsAndInsert(null, null, null, 1, 1000);
+    TL_RingCentral_Logs.getLogs(new List<TL_RingCentral_Logs.variables>{ testVariables });
     Test.stopTest();   
   }
 
@@ -93,7 +101,7 @@ public with sharing class TL_Ring_Tests {
         Test.stopTest();
         
         System.assertEquals(1, callLogs.size(), 'One call log expected');
-    }
+  }
 
   public class GetTokenMock implements HttpCalloutMock {
     public HTTPResponse respond(HTTPRequest req) {

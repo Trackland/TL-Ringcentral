@@ -154,14 +154,14 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>Ring Central Record</label>
+    <label>Call Log</label>
     <nameField>
         <displayFormat>LOG-{0000}</displayFormat>
-        <label>Numero de registro</label>
+        <label>Number</label>
         <trackHistory>false</trackHistory>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Ring Central Records</pluralLabel>
+    <pluralLabel>Call Logs</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
