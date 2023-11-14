@@ -103,6 +103,33 @@ public with sharing class TL_Ring_Tests {
         System.assertEquals(1, callLogs.size(), 'One call log expected');
   }
 
+  @IsTest
+    static void testSchedulableMethod() {
+        Test.startTest();
+        Datetime currentDateTime = Datetime.now();
+        String jobCred = System.schedule('testSchedulerMethod', TestScheduledApexFromTestMethod.CRON_EXP, new TestScheduledApexFromTestMethod());
+        CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime FROM CronTrigger WHERE id = :jobCred];
+
+        if (currentDateTime.hour() >= 3) {
+          currentDateTime = currentDateTime.addDays(1);
+        }
+
+        Datetime scheduledDateTime = Datetime.newInstance(
+          currentDateTime.year(),
+          currentDateTime.month(),
+          currentDateTime.day(),
+          3,
+          0,
+          0
+        );
+
+        System.assertEquals(TestScheduledApexFromTestMethod.CRON_EXP, ct.CronExpression);
+        System.assertEquals(0, ct.TimesTriggered);
+        System.assertEquals(scheduledDateTime.format('yyyy-MM-dd HH:mm:ss'), String.valueOf(ct.NextFireTime));
+        
+        Test.stopTest();
+  }
+
   public class GetTokenMock implements HttpCalloutMock {
     public HTTPResponse respond(HTTPRequest req) {
       HttpResponse res = new HttpResponse();
