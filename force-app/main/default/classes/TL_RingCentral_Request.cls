@@ -9,6 +9,7 @@ public with sharing class TL_RingCentral_Request {
         req.setHeader('Authorization', 'Bearer '+ cred.token__c);
         if (body != '') req.setBody(body);
         HttpResponse res = sendRequest(req);
+        System.debug(res.getBody());
         return res.getBody();
     }
 
@@ -37,6 +38,7 @@ public with sharing class TL_RingCentral_Request {
     public static RingCredential__mdt getCredential(String credName){
         String query = 'SELECT Id, ClientId__c, ClientSecret__c, JWT__c, version__c, URL__c FROM RingCredential__mdt';
         if(credName != null) query += ' WHERE DeveloperName = \''+credName+'\'';
+        System.debug(query);
         RingCredential__mdt[] creds = (RingCredential__mdt []) Database.query(query); 
         System.debug(creds);
         if(creds.size() == 0) throw new RingException('No RingCentral credentials found');
