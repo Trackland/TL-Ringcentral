@@ -3,11 +3,16 @@ public with sharing class TL_RingCentral_SMS {
     @InvocableMethod(label='Send Text Message' description='Send Text Message')
     public static void send(variables[] vars){
         for(variables var : vars){
+            System.debug('fromPhone: ' + var.fromPhone);
+            System.debug('toPhone: ' + var.toPhone);
             send(var.fromPhone, var.toPhone, var.message, var.credName);
         }
     }
 
+    @future(callout=true)
     public static void send(String fromPhone, String toPhone, String message, String credName){
+        System.debug('fromPhone: ' + fromPhone);
+        System.debug('toPhone: ' + toPhone);
         String endpoint = '/v1.0/account/~/extension/~/sms';
         String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
         String method = 'POST';
