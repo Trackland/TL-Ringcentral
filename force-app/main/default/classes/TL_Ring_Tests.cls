@@ -77,6 +77,29 @@ public with sharing class TL_Ring_Tests {
     Test.stopTest();   
   }
 
+  @IsTest
+  static void TestRunningJobs() {
+        SMS_Job__c newJob = new SMS_Job__c();
+        newJob.FromAccount__c = 'Tampa';
+        newJob.FromPhone__c = '+13854296821';
+        newJob.ToContact__c = 'Will Johnson';
+        newJob.ToPhone__c = '+18043815513';
+        newJob.Send_At__c = Datetime.now().addDays(-1);
+        newJob.Message__c = 'Your appointment with Bull Oak Clinic is tomorrow! We cant wait to see you and help you on your journey to improved health. If you need to reschedule or have any questions, call us at ' + newJob.FromPhone__c + '. See you soon!';
+        newJob.SMS_Sequence_Template__c = null;
+        newJob.Status__c = 'Waiting';
+
+        insert newJob;
+        
+        Test.startTest();
+        TL_RingCentral_SMS.jobProcessing('Production');
+        Test.stopTest();   
+
+        SMS_Job__c[] jobsAfterProcessing = [SELECT Id, Status__c, RC_SMS_Id__c FROM SMS_Job__c WHERE Id = :newJob.Id];
+        System.assertEquals('Complete', jobsAfterProcessing[0].Status__c);
+        System.assertEquals('1234567890', jobsAfterProcessing[0].RC_SMS_Id__c);
+  }
+
   @isTest
     static void TestRetrieveCallLogs() {
         List<Call_Log__c> callLogsToInsert = new List<Call_Log__c>();

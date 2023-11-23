@@ -4,7 +4,7 @@ global with sharing class TL_Schedulable_SMS implements Schedulable {
         String result;
 
         try {
-            TL_RingCentral_SMS.insertNewSequence();
+            TL_RingCentral_SMS.jobProcessing('Production');
             System.abortJob(jobId);
           }
           catch(Exception e) {

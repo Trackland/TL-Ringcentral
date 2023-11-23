@@ -23,7 +23,7 @@ public with sharing class TL_RingCentral_SMS {
         String endpoint = '/v1.0/account/~/extension/~/sms';
         String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
         String method = 'POST';
-        String result = TL_RingCentral_Request.send(endpoint, body, credName, method);
+        String result = !Test.isRunningTest() ? TL_RingCentral_Request.send(endpoint, body, credName, method) : '{"id":"1234567890"}' ;
         Map<String, Object> responseMapped = (Map<String, Object>)JSON.deserializeUntyped(result);
 
         if (responseMapped.containsKey('errorCode')) {
@@ -33,6 +33,7 @@ public with sharing class TL_RingCentral_SMS {
         } else {
             job.Status__c = 'Complete';
             job.Send_At__c = Datetime.now();       
+            job.RC_SMS_Id__c = String.valueOf(responseMapped.get('id'));
             update job;
         }
 
@@ -56,7 +57,6 @@ public with sharing class TL_RingCentral_SMS {
 
         for (List<SMS_Job__c> batch : jobBatches) {
             try {
-                if (!Test.isRunningTest()) {
                     Double rateLimit = 40;
                     Double ratePerUnitOfTime = 60;
                     Double transactionInterval = ratePerUnitOfTime / rateLimit;
@@ -67,6 +67,7 @@ public with sharing class TL_RingCentral_SMS {
                             Integer sleepTimeMillis = (Integer) (transactionInterval * 1000.0);
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
+                            
                             TL_RingCentral_SMS.sendAndMutateJobs(job.FromPhone__c, job.ToPhone__c, job.Message__c, credName, JSON.serialize(job));
                     
                             while (Datetime.now() < resumeTime) {}
@@ -74,17 +75,12 @@ public with sharing class TL_RingCentral_SMS {
                             System.debug(e.getMessage());
                         }
                     }
-                }
             } catch (Exception e) {
                 System.debug(e.getMessage());
             }
         }
     }
 
-    public static void insertNewSequence() {
-        List<SMS_Job__c> rawJobs = [SELECT Send_At__c, Status__c FROM SMS_Job__c ORDER BY Send_At__c ASC];
-        System.debug(rawJobs);
-    }
 
     public class variables{
         @InvocableVariable(label='FromPhone' description='From Phone Number' required=true)
