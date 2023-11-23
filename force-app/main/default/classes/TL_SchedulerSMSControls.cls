@@ -23,15 +23,5 @@ global with sharing class TL_SchedulerSMSControls {
 
         return seconds + ' ' + minutes + ' ' + hours + ' ' + dayOfMonth + ' ' + month + ' ' + dayOfWeek + ' ' + year;
     } 
-
-    @future
-    public static void abort(){
-        try {
-            List<CronTrigger> jobs = [SELECT Id From CronTrigger WHERE CronJobDetailId in (SELECT Id FROM CronJobDetail WHERE Name = :JobName) Limit 1];
-            if(jobs != null && jobs.size() > 0) System.abortJob(jobs[0].Id);
-        } catch (Exception e) {
-            System.debug('Error in abort: ' + e.getMessage());
-        }
-    }
 }
 

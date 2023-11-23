@@ -155,6 +155,16 @@ public with sharing class TL_Ring_Tests {
         Test.stopTest();
   }
 
+  @isTest
+  static void testInit() {
+        Test.startTest();
+        TL_SchedulerSMSControls.init(5);
+        Test.stopTest();
+
+        List<CronTrigger> cronTriggers = [SELECT Id FROM CronTrigger WHERE CronJobDetail.Name = :'Schedulable SMS Jobs' LIMIT 1];
+        System.assertNotEquals(0, cronTriggers.size(), 'No se creó el trabajo programado');
+  }
+  
   public class GetTokenMock implements HttpCalloutMock {
     public HTTPResponse respond(HTTPRequest req) {
       HttpResponse res = new HttpResponse();
