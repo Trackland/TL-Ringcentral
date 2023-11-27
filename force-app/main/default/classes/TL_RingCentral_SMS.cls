@@ -64,12 +64,15 @@ public with sharing class TL_RingCentral_SMS {
 
                     for (SMS_Job__c job : batch) {
                         try {
+                            String query = 'SELECT Id, Phone__c FROM RingCredential__mdt';
+                            if(credName != null) query += ' WHERE DeveloperName = \'' + credName + '\'';
+                            RingCredential__mdt[] cred = (RingCredential__mdt []) Database.query(query); 
                             Integer sleepTimeMillis = (Integer) (transactionInterval * 1000.0);
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
                             String modifiedMessage = replaceVariables(job.Message__c, job);
                             
-                            TL_RingCentral_SMS.sendAndMutateJobs(job.FromPhone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
+                            TL_RingCentral_SMS.sendAndMutateJobs(cred[0].Phone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
                     
                             while (Datetime.now() < resumeTime) {}
                         } catch (Exception e) {
