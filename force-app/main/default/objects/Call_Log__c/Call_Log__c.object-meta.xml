@@ -143,6 +143,7 @@
     <allowInChatterGroups>true</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <description>Object that provides and stores logs of calls made in the Ring Central Widget</description>
     <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
