@@ -89,7 +89,7 @@ public with sharing class TL_RingCentral_SMS {
     
         while (matcher.find()) {
             String variableName = matcher.group(1);
-            String replacement = String.valueOf(job.get(variableName));
+            String replacement = job.get(variableName) == null ? 'Empty' : String.valueOf(job.get(variableName));
     
             result = result.replace(matcher.group(), replacement);
         }
