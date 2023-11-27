@@ -3,11 +3,14 @@ public with sharing class TL_RingCentral_SMS {
     @InvocableMethod(label='Send Text Message' description='Send Text Message')
     public static void send(variables[] vars){
         for(variables var : vars){
-            System.debug('fromPhone: ' + var.fromPhone);
-            System.debug('toPhone: ' + var.toPhone);
             send(var.fromPhone, var.toPhone, var.message, var.credName);
         }
     }
+
+    public static void get(){
+        String res = TL_RingCentral_Request.send('~/extension/~/message-sync?syncType=FSync&recordCount=20', '', 'Sandbox', 'GET');
+        System.debug(res);
+    }    
 
     @future(callout=true)
     public static void send(String fromPhone, String toPhone, String message, String credName){
