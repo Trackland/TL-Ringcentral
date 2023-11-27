@@ -67,8 +67,9 @@ public with sharing class TL_RingCentral_SMS {
                             Integer sleepTimeMillis = (Integer) (transactionInterval * 1000.0);
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
+                            String modifiedMessage = replaceVariables(job.Message__c, job);
                             
-                            TL_RingCentral_SMS.sendAndMutateJobs(job.FromPhone__c, job.ToPhone__c, job.Message__c, credName, JSON.serialize(job));
+                            TL_RingCentral_SMS.sendAndMutateJobs(job.FromPhone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
                     
                             while (Datetime.now() < resumeTime) {}
                         } catch (Exception e) {
@@ -81,6 +82,20 @@ public with sharing class TL_RingCentral_SMS {
         }
     }
 
+    private static String replaceVariables(String message, SMS_Job__c job) {
+        Pattern pattern = Pattern.compile('\\{\\{(\\w+__c)\\}\\}');
+        Matcher matcher = pattern.matcher(message);
+        String result = message;
+    
+        while (matcher.find()) {
+            String variableName = matcher.group(1);
+            String replacement = String.valueOf(job.get(variableName));
+    
+            result = result.replace(matcher.group(), replacement);
+        }
+    
+        return result;
+    }
 
     public class variables{
         @InvocableVariable(label='FromPhone' description='From Phone Number' required=true)
