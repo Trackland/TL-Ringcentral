@@ -40,18 +40,6 @@ public with sharing class TL_RingCentral_SMS {
     }
     
     public static void jobProcessing(String credName) {
-
-        SMS_Job__c newJob = new SMS_Job__c();
-        newJob.FromPhone__c = '+1234567890';
-        newJob.ToPhone__c = '+13456789900';
-        newJob.Message__c = 'Thank you for scheduling your visit at Bull Oak Clinic! Your appointment is confirmed for {{Send_At__c}}. We look forward to assisting you with your health needs. If you have any questions, feel free to reply or call us at {{FromPhone__c}}. See you soon!';
-        newJob.Send_At__c = Datetime.newInstance(2023, 11, 26, 15, 45, 0);
-        newJob.Status__c = 'Waiting';
-        newJob.ToContact__c = '003Hp00002ourVvIAI';
-        newJob.FromAccount__c = '001Hp00002cGLVnIAO';
-
-        insert newJob;
-
         Integer batchSize = 40;
         List<List<SMS_Job__c>> jobBatches = new List<List<SMS_Job__c>>();
         List<SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
@@ -83,8 +71,6 @@ public with sharing class TL_RingCentral_SMS {
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
                             String modifiedMessage = replaceVariables(job.Message__c, job);
-
-                            System.debug(modifiedMessage);
                             
                             TL_RingCentral_SMS.sendAndMutateJobs(cred[0].Phone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
                     
