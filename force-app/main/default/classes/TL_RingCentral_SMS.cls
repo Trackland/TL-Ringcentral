@@ -48,8 +48,9 @@ public with sharing class TL_RingCentral_SMS {
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
                             String modifiedMessage = replaceVariables(job.Message__c, job);
+                            String formattedPhoneNumber = '+1' + job.FromPhone__c.replaceAll('\\D', '');
 
-                            TL_SMSQueable queueableJob = new TL_SMSQueable(job.FromPhone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
+                            TL_SMSQueable queueableJob = new TL_SMSQueable(formattedPhoneNumber, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
                             System.enqueueJob(queueableJob);
                     
                             while (Datetime.now() < resumeTime) {}
@@ -77,9 +78,15 @@ public with sharing class TL_RingCentral_SMS {
                 Datetime keyInfo = (Datetime) job.get(variableName);
                 String timeNotation = (keyInfo.hourGmt() > 12 ? 'PM' : 'AM');
                 Integer twelveHourFormat = keyInfo.hourGmt() > 12 ? keyInfo.hourGmt() - 12 : keyInfo.hourGmt();
-                String formatted = keyInfo.year() + '/' + String.valueOf(keyInfo.month()).leftPad(2, '0') + '/' + String.valueOf(keyInfo.day()).leftPad(2, '0') + ' ' + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':' + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
+                String formatted = String.valueOf(keyInfo.month()).leftPad(2, '0') + '/' + String.valueOf(keyInfo.day()).leftPad(2, '0') + '/' + keyInfo.year() + ' ' + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':' + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
                
                 replacement = formatted;
+            }
+
+            if (variableName == 'FromPhone__c') {
+                String phoneNumber = (String) job.get(variableName);
+                String phoneNumberDigits = phoneNumber.replaceAll('\\D', '');
+                replacement = '+1' + phoneNumberDigits;
             }
     
             result = result.replace(matcher.group(), replacement);
