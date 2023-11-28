@@ -1,4 +1,6 @@
 public with sharing class TL_RingCentral_SMS {
+
+    private static Integer attempts = 0;
   
     @InvocableMethod(label='Send Text Message' description='Send Text Message')
     public static void send(variables[] vars){
@@ -15,28 +17,6 @@ public with sharing class TL_RingCentral_SMS {
         String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
         String method = 'POST';
         String result = TL_RingCentral_Request.send(endpoint, body, credName, method);
-    }
-
-    @future(callout=true)
-    public static void sendAndMutateJobs(String fromPhone, String toPhone, String message, String credName, String serializedJob){
-        SMS_Job__c job = (SMS_Job__c)JSON.deserialize(serializedJob, SMS_Job__c.class);
-        String endpoint = '/v1.0/account/~/extension/~/sms';
-        String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
-        String method = 'POST';
-        String result = !Test.isRunningTest() ? TL_RingCentral_Request.send(endpoint, body, credName, method) : '{"id":"1234567890"}' ;
-        Map<String, Object> responseMapped = (Map<String, Object>)JSON.deserializeUntyped(result);
-
-        if (responseMapped.containsKey('errorCode')) {
-            job.Status__c = 'Fail';   
-            job.Send_At__c = Datetime.now();        
-            update job;
-        } else {
-            job.Status__c = 'Complete';
-            job.Send_At__c = Datetime.now();       
-            job.RC_SMS_Id__c = String.valueOf(responseMapped.get('id'));
-            update job;
-        }
-
     }
     
     public static void jobProcessing(String credName) {
@@ -64,15 +44,13 @@ public with sharing class TL_RingCentral_SMS {
 
                     for (SMS_Job__c job : batch) {
                         try {
-                            String query = 'SELECT Id, Phone__c FROM RingCredential__mdt';
-                            if(credName != null) query += ' WHERE DeveloperName = \'' + credName + '\'';
-                            RingCredential__mdt[] cred = (RingCredential__mdt []) Database.query(query); 
                             Integer sleepTimeMillis = (Integer) (transactionInterval * 1000.0);
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
                             String modifiedMessage = replaceVariables(job.Message__c, job);
-                            
-                            TL_RingCentral_SMS.sendAndMutateJobs(cred[0].Phone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
+
+                            TL_SMSQueable queueableJob = new TL_SMSQueable(job.FromPhone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
+                            System.enqueueJob(queueableJob);
                     
                             while (Datetime.now() < resumeTime) {}
                         } catch (Exception e) {
@@ -97,8 +75,10 @@ public with sharing class TL_RingCentral_SMS {
 
             if (dataType == 'Date/Time') {
                 Datetime keyInfo = (Datetime) job.get(variableName);
-                Integer substractedHours = keyInfo.hour() - 4;
-                String formatted = keyInfo.year() + '/' + keyInfo.month() + '/' + keyInfo.day() + ' ' + substractedHours + ':' + keyInfo.minute() + ' ' + (keyInfo.hour() >= 12 ? 'PM' : 'AM');
+                String timeNotation = (keyInfo.hourGmt() > 12 ? 'PM' : 'AM');
+                Integer twelveHourFormat = keyInfo.hourGmt() > 12 ? keyInfo.hourGmt() - 12 : keyInfo.hourGmt();
+                String formatted = keyInfo.year() + '/' + String.valueOf(keyInfo.month()).leftPad(2, '0') + '/' + String.valueOf(keyInfo.day()).leftPad(2, '0') + ' ' + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':' + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
+               
                 replacement = formatted;
             }
     
