@@ -92,15 +92,14 @@ public with sharing class TL_RingCentral_SMS {
                 Integer offsetMillis = tz.getOffset(keyInfo);
                 keyInfo = keyInfo.addSeconds(offsetMillis / 1000);
             
-                String timeNotation = (keyInfo.hourGmt() > 12 ? 'PM' : 'AM');
-                Integer twelveHourFormat = keyInfo.hourGmt() > 12 ? keyInfo.hourGmt() - 12 : keyInfo.hourGmt();
+                String timeNotation = (keyInfo.hour() > 12 ? 'PM' : 'AM');
+                Integer twelveHourFormat = keyInfo.hour() > 12 ? keyInfo.hour() - 12 : keyInfo.hour();
                 String formatted = String.valueOf(keyInfo.month()).leftPad(2, '0') + '/'
                                  + String.valueOf(keyInfo.day()).leftPad(2, '0') + '/'
                                  + keyInfo.year() + ' '
                                  + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':'
                                  + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
             
-                System.debug(job.TimeZone__c + ' ' + job.get(variableName) + ' ' + keyInfo + twelveHourFormat);
                 replacement = formatted;
             }
 

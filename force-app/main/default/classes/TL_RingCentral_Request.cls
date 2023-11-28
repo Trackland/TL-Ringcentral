@@ -20,7 +20,7 @@ public with sharing class TL_RingCentral_Request {
         req.setEndpoint(cred.URL__c+'/oauth/token');
         req.setMethod('POST');
         req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.setHeader('Authorization', 'Basic '+basicAuth);
+        req.setHeader('Authorization', 'Basic '+ basicAuth);
         req.setBody('grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+cred.JWT__c);
         HttpResponse res = sendRequest(req);
         Map<String, Object> resObj = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
