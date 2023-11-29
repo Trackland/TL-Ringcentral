@@ -143,6 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -155,9 +156,8 @@
     <externalSharingModel>Private</externalSharingModel>
     <label>RC SMS Sequence</label>
     <nameField>
-        <displayFormat>RCS-{00000}</displayFormat>
         <label>Name</label>
-        <type>AutoNumber</type>
+        <type>Text</type>
     </nameField>
     <pluralLabel>RC SMS Sequences</pluralLabel>
     <searchLayouts></searchLayouts>
