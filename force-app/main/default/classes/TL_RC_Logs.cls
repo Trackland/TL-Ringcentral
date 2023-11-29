@@ -348,10 +348,9 @@ public with sharing class TL_RC_Logs {
       if(log.Lead__c != null && (history.Lead__c == null || history.Lead__c != log.Lead__c)) history.Lead__c = log.Lead__c;
     }
     
-    // AllHistories.addAll(existingHistories);
-    // AllHistories.addAll(toInsert);
-    // AllHistories.addAll(toUpdate);
-    // addServiceAppointments(AllHistories);
+    AllHistories.addAll(toInsert);
+    AllHistories.addAll(toUpdate);
+    addServiceAppointments(AllHistories);
 
     System.debug('To Insert: '+toInsert.size());
     if(toInsert.size() > 0) insert toInsert;
@@ -368,7 +367,7 @@ public with sharing class TL_RC_Logs {
       if(history.Lead__c != null) leadIds.add(history.Lead__c);
     }
 
-    ServiceAppointment[] appts = [SELECT Id FROM ServiceAppointment WHERE ContactId IN :contactIds Order By Status];
+    ServiceAppointment[] appts = [SELECT Id, ContactId FROM ServiceAppointment WHERE ContactId IN :contactIds Order By Status];
 
     Map<Id, ServiceAppointment> apptsByContactIdMap = new Map<Id, ServiceAppointment>();
     for(ServiceAppointment appt : appts){
