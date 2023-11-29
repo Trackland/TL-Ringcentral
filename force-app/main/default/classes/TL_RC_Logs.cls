@@ -1,16 +1,5 @@
 public with sharing class TL_RC_Logs {
 
-  // @InvocableMethod(label='Get Call Logs' description='Get the ring central call logs')
-  // public static void getLogs(variables[] vars){
-  //   String credName = vars[0].credName;
-  //   String type = vars[0].type;
-  //   if (type == 'call') {
-  //     retrieveAllLogsAndInsert(credName, null, null, 0);
-  //   } else {
-  //     throw RingCentralException('Invalid type');
-  //   }    
-  // } 
-
   public class AsyncGetLogs implements Queueable {
     private String CredName;
     private Date DateFrom;
@@ -29,7 +18,6 @@ public with sharing class TL_RC_Logs {
     }
   } 
 
-  
   public static void getLogs(String credName, Date dateFrom, Date dateTo, Integer pageNumber) {
     List<Call_Log__c> callLogsToInsert = new List<Call_Log__c>();
     Integer firstCallout = 0;
@@ -236,5 +224,17 @@ public with sharing class TL_RC_Logs {
   }
 
   public class RingCentralException extends Exception{}
+
+
+    // @InvocableMethod(label='Get Call Logs' description='Get the ring central call logs')
+  // public static void getLogs(variables[] vars){
+  //   String credName = vars[0].credName;
+  //   String type = vars[0].type;
+  //   if (type == 'call') {
+  //     retrieveAllLogsAndInsert(credName, null, null, 0);
+  //   } else {
+  //     throw RingCentralException('Invalid type');
+  //   }    
+  // } 
     
 }
