@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>RC_Credential__mdt</members> 
-        <members>RC_Call_Log__c</members> 
-        <members>RC_SMS_Job__c</members> 
-        <members>RC_SMS_Job_Template__c</members> 
-        <members>RC_SMS_Sequence_Template__c</members> 
-        <members>RC_Number_History__c</members> 
-        <name>CustomObject</name>
+        <members>Production</members> 
+        <members>Sandbox</members> 
+        <name>CustomMetadata</name>
+    </types>
+    <types>
+        <members>Admin</members> 
+        <name>Profile</name>
     </types>
     <version>58.0</version>
 </Package>
