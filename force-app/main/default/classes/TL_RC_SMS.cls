@@ -1,55 +1,34 @@
-public with sharing class TL_RingCentral_SMS {
+public with sharing class TL_RC_SMS {
+
+    private static Integer attempts = 0;
   
     @InvocableMethod(label='Send Text Message' description='Send Text Message')
     public static void send(variables[] vars){
         for(variables var : vars){
+            System.debug('fromPhone: ' + var.fromPhone);
+            System.debug('toPhone: ' + var.toPhone);
             send(var.fromPhone, var.toPhone, var.message, var.credName);
         }
     }
-
-    public static void get(){
-        String res = TL_RingCentral_Request.send('~/extension/~/message-sync?syncType=FSync&recordCount=20', '', 'Sandbox', 'GET');
-        System.debug(res);
-    }    
 
     @future(callout=true)
     public static void send(String fromPhone, String toPhone, String message, String credName){
         String endpoint = '/v1.0/account/~/extension/~/sms';
         String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
         String method = 'POST';
-        String result = TL_RingCentral_Request.send(endpoint, body, credName, method);
-    }
-
-    @future(callout=true)
-    public static void sendAndMutateJobs(String fromPhone, String toPhone, String message, String credName, String serializedJob){
-        SMS_Job__c job = (SMS_Job__c)JSON.deserialize(serializedJob, SMS_Job__c.class);
-        String endpoint = '/v1.0/account/~/extension/~/sms';
-        String body = '{"to":[{"phoneNumber":"'+toPhone+'"}],"from":{"phoneNumber":"'+fromPhone+'"},"text":"'+message+'"}';
-        String method = 'POST';
-        String result = !Test.isRunningTest() ? TL_RingCentral_Request.send(endpoint, body, credName, method) : '{"id":"1234567890"}' ;
-        Map<String, Object> responseMapped = (Map<String, Object>)JSON.deserializeUntyped(result);
-
-        if (responseMapped.containsKey('errorCode')) {
-            job.Status__c = 'Fail';   
-            job.Send_At__c = Datetime.now();        
-            update job;
-        } else {
-            job.Status__c = 'Complete';
-            job.Send_At__c = Datetime.now();       
-            job.RC_SMS_Id__c = String.valueOf(responseMapped.get('id'));
-            update job;
-        }
-
+        String result = TL_RC_Request.send(endpoint, body, credName, method);
     }
     
     public static void jobProcessing(String credName) {
         Integer batchSize = 40;
-        List<List<SMS_Job__c>> jobBatches = new List<List<SMS_Job__c>>();
-        List<SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
+        List<List<RC_SMS_Job__c>> jobBatches = new List<List<RC_SMS_Job__c>>();
+        List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
+
+        System.debug(rawJobs);
 
         for (Integer i = 0; i < rawJobs.size(); i += batchSize) {
             Integer endIndex = Math.min(i + batchSize, rawJobs.size());
-            List<SMS_Job__c> batch = new List<SMS_Job__c>();
+            List<RC_SMS_Job__c> batch = new List<RC_SMS_Job__c>();
             
             for (Integer j = i; j < endIndex; j++) {
                 batch.add(rawJobs[j]);
@@ -58,24 +37,23 @@ public with sharing class TL_RingCentral_SMS {
             jobBatches.add(batch);
         }
 
-        for (List<SMS_Job__c> batch : jobBatches) {
+        for (List<RC_SMS_Job__c> batch : jobBatches) {
             try {
                     Double rateLimit = 40;
                     Double ratePerUnitOfTime = 60;
                     Double transactionInterval = ratePerUnitOfTime / rateLimit;
-                    List<SMS_Job__c> jobsToUpdate = new List<SMS_Job__c>();
+                    List<RC_SMS_Job__c> jobsToUpdate = new List<RC_SMS_Job__c>();
 
-                    for (SMS_Job__c job : batch) {
+                    for (RC_SMS_Job__c job : batch) {
                         try {
-                            String query = 'SELECT Id, Phone__c FROM RingCredential__mdt';
-                            if(credName != null) query += ' WHERE DeveloperName = \'' + credName + '\'';
-                            RingCredential__mdt[] cred = (RingCredential__mdt []) Database.query(query); 
                             Integer sleepTimeMillis = (Integer) (transactionInterval * 1000.0);
                             Datetime now = Datetime.now();
                             Datetime resumeTime = now.addSeconds(sleepTimeMillis / 1000);
                             String modifiedMessage = replaceVariables(job.Message__c, job);
-                            
-                            TL_RingCentral_SMS.sendAndMutateJobs(cred[0].Phone__c, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job));
+                            String formattedPhoneNumber = '+1' + job.FromPhone__c.replaceAll('\\D', '');
+
+                            TL_RC_SMS_Queue queueableJob = new TL_RC_SMS_Queue(formattedPhoneNumber, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
+                            System.enqueueJob(queueableJob);
                     
                             while (Datetime.now() < resumeTime) {}
                         } catch (Exception e) {
@@ -88,14 +66,52 @@ public with sharing class TL_RingCentral_SMS {
         }
     }
 
-    private static String replaceVariables(String message, SMS_Job__c job) {
+    private static String replaceVariables(String message, RC_SMS_Job__c job) {
         Pattern pattern = Pattern.compile('\\{\\{(\\w+__c)\\}\\}');
         Matcher matcher = pattern.matcher(message);
         String result = message;
-    
+
         while (matcher.find()) {
             String variableName = matcher.group(1);
             String replacement = job.get(variableName) == null ? 'Empty' : String.valueOf(job.get(variableName));
+            String dataType = [SELECT DataType FROM FieldDefinition WHERE EntityDefinitionId=:'RC_SMS_Job__c' AND QualifiedApiName=:variableName LIMIT 1].DataType;
+
+            if (dataType == 'Date/Time') {
+                Datetime keyInfo = (Datetime) job.get(variableName);
+                System.debug(variableName+' | '+job.get(variableName));
+
+                String timeZoneStr = job.TimeZone__c != null ? job.TimeZone__c : 'GMT';
+                TimeZone tz = TimeZone.getTimeZone(timeZoneStr);
+                TimeZone utz = UserInfo.getTimeZone();
+                Integer offsetMillis = tz.getOffset(keyInfo);
+                Integer UoffsetMillis = utz.getOffset(keyInfo);
+                
+                System.debug(tz);
+                System.debug(offsetMillis);
+                System.debug(utz);
+                System.debug(UoffsetMillis);
+                
+                // Integer offsetMillis = tz.getOffset(keyInfo);
+                keyInfo = keyInfo.addSeconds(offsetMillis / 1000);
+
+                Integer hour = keyInfo.hourGmt();
+                System.debug(hour);
+                String timeNotation = (hour > 12 ? 'PM' : 'AM');
+                Integer twelveHourFormat = hour > 12 ? hour - 12 : hour;
+                String formatted = String.valueOf(keyInfo.month()).leftPad(2, '0') + '/'
+                                 + String.valueOf(keyInfo.day()).leftPad(2, '0') + '/'
+                                 + keyInfo.year() + ' '
+                                 + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':'
+                                 + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
+                
+                replacement = formatted;
+            }
+
+            if (variableName == 'FromPhone__c') {
+                String phoneNumber = (String) job.get(variableName);
+                String phoneNumberDigits = phoneNumber.replaceAll('\\D', '');
+                replacement = '+1' + phoneNumberDigits;
+            }
     
             result = result.replace(matcher.group(), replacement);
         }
