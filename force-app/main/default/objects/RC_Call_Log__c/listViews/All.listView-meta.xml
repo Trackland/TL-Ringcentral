@@ -7,6 +7,9 @@
     <columns>Direction__c</columns>
     <columns>From_Phone_Number__c</columns>
     <columns>To_Phone_Number__c</columns>
+    <columns>From_Name__c</columns>
+    <columns>To_Name__c</columns>
+    <columns>Log_Id__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>
