@@ -9,7 +9,6 @@ public with sharing class TL_RC_Request {
     req.setHeader('Authorization', 'Bearer '+ cred.token__c);
     if (body != '') req.setBody(body);
     HttpResponse res = sendRequest(req);
-    // System.debug(res.getBody());
     return res.getBody();
   }
 
@@ -25,8 +24,6 @@ public with sharing class TL_RC_Request {
     HttpResponse res = sendRequest(req);
     Map<String, Object> resObj = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
     cred.token__c = (string)resObj.get('access_token');
-    // System.debug(res.getBody());
-    // System.debug(cred.token__c);
     if(cred.token__c == null && Test.isRunningTest()) {
         cred.token__c = 'testToken';
     } else if(cred.token__c == null) {
@@ -38,9 +35,7 @@ public with sharing class TL_RC_Request {
   public static RC_Credential__mdt getCredential(String credName){
     String query = 'SELECT Id, ClientId__c, ClientSecret__c, JWT__c, version__c, URL__c FROM RC_Credential__mdt';
     if(credName != null) query += ' WHERE DeveloperName = \''+credName+'\'';
-    System.debug(query);
     RC_Credential__mdt[] creds = (RC_Credential__mdt []) Database.query(query); 
-    System.debug(creds);
     if(creds.size() == 0) throw new RingException('No RingCentral credentials found');
     return creds[0];
   }

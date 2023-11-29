@@ -34,14 +34,12 @@ public with sharing class TL_RC_Logs {
     Map<String, RC_Call_Log__c> LogsByNumberMap = new Map<String, RC_Call_Log__c>();
   
     recursiveCallGetLogs(credName, dFrom, dTo, page, AllRecords);
-    System.debug('All Records: '+AllRecords.size());
     getExistingLogs(ExistingLogsByIdMap, AllRecords);
     createAllCallLogs(ExistingLogsByIdMap, AllRecords, LogsToInsert, LogsByNumberMap);
     connectLogToContactOrLead(LogsByNumberMap, LogsToUpdate);
     insertLogsByBatches(callLogsToInsert, batchSize, completionFlag);    
     
     if(LogsToInsert.size() > 0) insert LogsToInsert;
-    System.debug('To Update: '+LogsToUpdate.size());
     if(LogsToUpdate.size() > 0) update LogsToUpdate;
 
     QueueuCreateLogHistories queueuCreateLogHistories = new QueueuCreateLogHistories(LogsByNumberMap, AllRecords);
@@ -55,7 +53,7 @@ public with sharing class TL_RC_Logs {
     Map<String, Object> pageingInfo = (Map<String, Object>)response.get('paging');
     if(pageingInfo == null) return;
     Integer pgEnd = (Integer)pageingInfo.get('pageEnd');
-    System.debug('PageEnd: '+pgEnd + ' Page: ' + page);
+
     if(pgEnd <= page) {
       return;
     } else if(pgEnd == null) {
@@ -74,11 +72,10 @@ public with sharing class TL_RC_Logs {
     Date dateFrom = dFrom != null ? dFrom : System.today();
     Date dateTo = dTo != null ? dTo : System.today().addDays(1);
     String dateInterval = '?dateFrom=' + isoFormatter(dateFrom) + '&dateTo=' + isoFormatter(dateTo);
-    System.debug(dateInterval);
+
     try{
       String responseBody = TL_RC_Request.send(endpoint + dateInterval + paginated, '', credName, 'GET');
       Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
-      System.debug(JSON.serialize(result));
       return result;
     } catch (Exception e) {
       throw new RingCentralException(e.getMessage());
@@ -206,7 +203,6 @@ public with sharing class TL_RC_Logs {
         continue;
       }
       List<List<SObject>> groups = [FIND :search IN PHONE FIELDS RETURNING Contact(Id,Phone,MobilePhone), Lead(Id,Phone,MobilePhone), Account(Id, Phone)];
-      System.debug(groups);
     
       for(List<SObject> items : groups){
         for(SObject item : items){
@@ -224,10 +220,8 @@ public with sharing class TL_RC_Logs {
       Id Id = (Id)idMapByPhone.get(nbr);
       if(Id == null) continue;
 
-      System.debug(nbr + ' ' + Id);
       RC_Call_Log__c log = LogsByNumberMap.get(nbr);
       if(log == null) continue;
-      System.debug(log);
       
       if(Id.getSObjectType() == Contact.SObjectType && (log.Contact__c == null || log.Contact__c != Id)) {
         log.Contact__c = Id;
@@ -287,7 +281,6 @@ public with sharing class TL_RC_Logs {
       AllRCLogNumbers.add(log.From_Phone_Number__c);
     }
     RC_Call_Log__c[] allLogsByNumber = [SELECT Id, Lead__c, Contact__c, Log_Id__c, Session_Id__c, Record_Url__c, Action__c, Direction__c, Duration__c, From_Location__c, From_Name__c, From_Phone_Number__c, Result__c, To_Name__c, To_Phone_Number__c, Type__c FROM RC_Call_Log__c WHERE From_Phone_Number__c IN :AllRCLogNumbers];    
-    System.debug('All Logs By Number: '+allLogsByNumber.size());
     List<String> numbers = new List<String>();
     for(RC_Call_Log__c log : allLogsByNumber){
       String nbr = log.Direction__c == 'Inbound' ? (String)log.get('From_Phone_Number__c') : (String)log.get('To_Phone_Number__c');
@@ -296,7 +289,6 @@ public with sharing class TL_RC_Logs {
     }
     
     List<RC_Number_History__c> existingHistories = [SELECT Id, Lead__c, Call_Count__c, Contact__c, Earliest_Call__c, Phone__c, Recent_Call__c, Out_Bound_Count__c, In_Bound_Count__c FROM RC_Number_History__c WHERE Phone__c IN :numbers];
-    System.debug('Existing Histories: '+existingHistories.size());
     Map<String, RC_Number_History__c> existingHistoriesByNumberMap = new Map<String, RC_Number_History__c>();
     for(RC_Number_History__c history : existingHistories){
       history.Call_Count__c = 0;
@@ -311,7 +303,6 @@ public with sharing class TL_RC_Logs {
       if(nbr == null) continue;
       RC_Number_History__c history = historiesByNumberMap.get(nbr);
       RC_Number_History__c existing = existingHistoriesByNumberMap.get(cleanNumber(nbr, false));
-      // System.debug(cleanNumber(nbr, false)+' | '+existingHistoriesByNumberMap);
       if(existing != null) history = existing;
       
       if(history == null) {
@@ -383,17 +374,5 @@ public with sharing class TL_RC_Logs {
     }
   }
 
-  public class RingCentralException extends Exception{}
-    
-  // @InvocableMethod(label='Get Call Logs' description='Get the ring central call logs')
-  // public static void getLogs(variables[] vars){
-  //   String credName = vars[0].credName;
-  //   String type = vars[0].type;
-  //   if (type == 'call') {
-  //     retrieveAllLogsAndInsert(credName, null, null, 0);
-  //   } else {
-  //     throw RingCentralException('Invalid type');
-  //   }    
-  // } 
-    
+  public class RingCentralException extends Exception{}  
 }

@@ -2,15 +2,6 @@ public with sharing class TL_RC_SMS {
 
     private static Integer attempts = 0;
   
-    @InvocableMethod(label='Send Text Message' description='Send Text Message')
-    public static void send(variables[] vars){
-        for(variables var : vars){
-            System.debug('fromPhone: ' + var.fromPhone);
-            System.debug('toPhone: ' + var.toPhone);
-            send(var.fromPhone, var.toPhone, var.message, var.credName);
-        }
-    }
-
     @future(callout=true)
     public static void send(String fromPhone, String toPhone, String message, String credName){
         String endpoint = '/v1.0/account/~/extension/~/sms';
@@ -23,8 +14,6 @@ public with sharing class TL_RC_SMS {
         Integer batchSize = 40;
         List<List<RC_SMS_Job__c>> jobBatches = new List<List<RC_SMS_Job__c>>();
         List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
-
-        System.debug(rawJobs);
 
         for (Integer i = 0; i < rawJobs.size(); i += batchSize) {
             Integer endIndex = Math.min(i + batchSize, rawJobs.size());
@@ -52,8 +41,10 @@ public with sharing class TL_RC_SMS {
                             String modifiedMessage = replaceVariables(job.Message__c, job);
                             String formattedPhoneNumber = '+1' + job.FromPhone__c.replaceAll('\\D', '');
 
-                            TL_RC_SMS_Queue queueableJob = new TL_RC_SMS_Queue(formattedPhoneNumber, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
-                            System.enqueueJob(queueableJob);
+                            if (!Test.isRunningTest()) {
+                                TL_RC_SMS_Queue queueableJob = new TL_RC_SMS_Queue(formattedPhoneNumber, job.ToPhone__c, modifiedMessage, credName, JSON.serialize(job), attempts);
+                                System.enqueueJob(queueableJob);
+                            }          
                     
                             while (Datetime.now() < resumeTime) {}
                         } catch (Exception e) {
@@ -78,25 +69,13 @@ public with sharing class TL_RC_SMS {
 
             if (dataType == 'Date/Time') {
                 Datetime keyInfo = (Datetime) job.get(variableName);
-                System.debug(variableName+' | '+job.get(variableName));
-
                 String timeZoneStr = job.TimeZone__c != null ? job.TimeZone__c : 'GMT';
                 TimeZone tz = TimeZone.getTimeZone(timeZoneStr);
-                TimeZone utz = UserInfo.getTimeZone();
                 Integer offsetMillis = tz.getOffset(keyInfo);
-                Integer UoffsetMillis = utz.getOffset(keyInfo);
-                
-                System.debug(tz);
-                System.debug(offsetMillis);
-                System.debug(utz);
-                System.debug(UoffsetMillis);
-                
-                // Integer offsetMillis = tz.getOffset(keyInfo);
-                keyInfo = keyInfo.addSeconds(offsetMillis / 1000);
-                
 
+                keyInfo = keyInfo.addSeconds(offsetMillis / 1000);
+        
                 Integer hour = keyInfo.hourGmt();
-                System.debug(hour);
                 String timeNotation = (hour > 12 ? 'PM' : 'AM');
                 Integer twelveHourFormat = hour > 12 ? hour - 12 : hour;
                 String formatted = String.valueOf(keyInfo.month()).leftPad(2, '0') + '/'
@@ -119,16 +98,4 @@ public with sharing class TL_RC_SMS {
     
         return result;
     }
-
-    public class variables{
-        @InvocableVariable(label='FromPhone' description='From Phone Number' required=true)
-        public String fromPhone;
-        @InvocableVariable(label='ToPhone' description='To Phone Number' required=true)
-        public String toPhone;        
-        @InvocableVariable(label='message' description='Message' required=true)
-        public String message;
-        @InvocableVariable(label='CredName' description='Credential Name of Custome Metadata' required=true)
-        public String credName;        
-    }
-
 }

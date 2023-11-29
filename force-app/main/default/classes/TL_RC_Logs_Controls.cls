@@ -7,14 +7,14 @@ global class TL_RC_Logs_Controls implements Schedulable {
         Date dateTo = Date.today().addDays(1);
 
         try {
-            TL_RingCentral_Logs.retrieveAllLogsAndInsert('Production', dateFrom, dateTo, 1);
+            TL_RC_Logs.getLogs('Production', dateFrom, dateTo, 1);
         } catch (Exception e) {
             System.debug('Error: ' + e.getMessage());
         }
     }
 
     global static void init(Double Interval){
-        TL_Schedulable_Logs scheduledProcess = new TL_Schedulable_Logs();
+        TL_RC_Logs_Controls scheduledProcess = new TL_RC_Logs_Controls();
         System.schedule(JobName, CRON_EXP, scheduledProcess);
     }      
 }

@@ -3,7 +3,7 @@ global with sharing class TL_RC_SMS_Controls implements Schedulable {
 
     global static void init(Double Interval){
         try {
-            TL_Schedulable_SMS scheduler = new TL_Schedulable_SMS();
+            TL_RC_SMS_Controls scheduler = new TL_RC_SMS_Controls();
             String stringScheduleCronJob = getScheduleString(Integer.valueOf(Interval));
             System.schedule('Schedulable SMS Jobs', stringScheduleCronJob, scheduler);
         } catch (Exception e) {
@@ -29,7 +29,7 @@ global with sharing class TL_RC_SMS_Controls implements Schedulable {
         String result;
 
         try {
-            TL_RingCentral_SMS.jobProcessing('Production');
+            TL_RC_SMS.jobProcessing('Production');
             System.abortJob(jobId);
           }
           catch(Exception e) {
@@ -38,6 +38,6 @@ global with sharing class TL_RC_SMS_Controls implements Schedulable {
         }
         
         Integer IntervalInSeconds = 10;
-        TL_SchedulerSMSControls.init(IntervalInSeconds);
+        TL_RC_SMS_Controls.init(IntervalInSeconds);
     }
 }

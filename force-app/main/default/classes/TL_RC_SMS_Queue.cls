@@ -27,7 +27,7 @@ public class TL_RC_SMS_Queue implements Queueable, Database.AllowsCallouts {
         RC_SMS_Job__c job = (RC_SMS_Job__c)JSON.deserialize(serializedJob, RC_SMS_Job__c.class);
 
         try {
-            String result = !Test.isRunningTest() ? TL_RC_Request.send(endpoint, body, credName, method) : '{"id":"1234567890"}';
+            String result = TL_RC_Request.send(endpoint, body, credName, method);
             Map<String, Object> responseMapped = (Map<String, Object>)JSON.deserializeUntyped(result);
 
             if (responseMapped.containsKey('errorCode')) {
