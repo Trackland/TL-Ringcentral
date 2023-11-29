@@ -20,16 +20,6 @@ public with sharing class TL_RingCentral_SMS {
     }
     
     public static void jobProcessing(String credName) {
-
-        List<SMS_Job__c> jobs = [ SELECT Id, Status__c from SMS_Job__c ];
-        jobs[0].Status__c = 'Waiting';
-        jobs[0].FromPhone__c = '(813) 333-9207';
-        jobs[0].AppointmentDate__c = Datetime.newInstance(2023, 11, 23, 11, 30, 0);
-        jobs[0].Message__c = 'Thank you for scheduling your visit at Bull Oak Clinic! Your appointment is confirmed for {{AppointmentDate__c}}. We look forward to assisting you with your health needs. If you have any questions, feel free to reply or call us at {{FromPhone__c}}. See you soon!';
-        jobs[0].TimeZone__c = 'America/New_York';
-        update jobs;
-
-
         Integer batchSize = 40;
         List<List<SMS_Job__c>> jobBatches = new List<List<SMS_Job__c>>();
         List<SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
@@ -91,15 +81,16 @@ public with sharing class TL_RingCentral_SMS {
                 
                 Integer offsetMillis = tz.getOffset(keyInfo);
                 keyInfo = keyInfo.addSeconds(offsetMillis / 1000);
-            
-                String timeNotation = (keyInfo.hour() > 12 ? 'PM' : 'AM');
-                Integer twelveHourFormat = keyInfo.hour() > 12 ? keyInfo.hour() - 12 : keyInfo.hour();
+
+                Integer hour = keyInfo.hour();
+                String timeNotation = (hour > 12 ? 'PM' : 'AM');
+                Integer twelveHourFormat = hour > 12 ? hour - 12 : hour;
                 String formatted = String.valueOf(keyInfo.month()).leftPad(2, '0') + '/'
                                  + String.valueOf(keyInfo.day()).leftPad(2, '0') + '/'
                                  + keyInfo.year() + ' '
                                  + String.valueOf(twelveHourFormat).leftPad(2, '0') + ':'
                                  + String.valueOf(keyInfo.minute()).leftPad(2, '0') + ' ' + timeNotation;
-            
+                
                 replacement = formatted;
             }
 
