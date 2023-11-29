@@ -13,7 +13,7 @@ public with sharing class TL_RC_SMS {
     public static void jobProcessing(String credName) {
         Integer batchSize = 40;
         List<List<RC_SMS_Job__c>> jobBatches = new List<List<RC_SMS_Job__c>>();
-        List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
+        List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, ClinicAddress__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC];
 
         for (Integer i = 0; i < rawJobs.size(); i += batchSize) {
             Integer endIndex = Math.min(i + batchSize, rawJobs.size());

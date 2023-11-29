@@ -141,8 +141,8 @@ public with sharing class TL_RC_Tests {
 
     insert newJob;
 
-    List<Call_Log__c> callLogsToInsert = new List<Call_Log__c>();
-    callLogsToInsert.add(new Call_Log__c(
+    List<RC_Call_Log__c> callLogsToInsert = new List<RC_Call_Log__c>();
+    callLogsToInsert.add(new RC_Call_Log__c(
         Log_Id__c ='AYtyfnCj5tNDDUA',
         Session_Id__c = '18674468005',
         Record_Url__c = 'https://platform.devtest.ringcentral.com/restapi/v1.0/account/826906005/extension/826906005/call-log/AYtyfnCj5tNDDUA?view=Detailed',
