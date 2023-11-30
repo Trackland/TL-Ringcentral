@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "TL_RingCentral",
-      "versionName": "ver 3.2",
-      "versionNumber": "3.2.0.NEXT",
+      "versionName": "ver 3.3",
+      "versionNumber": "3.3.0.NEXT",
       "versionDescription": ""
     }
   ],
