@@ -46,7 +46,7 @@ public with sharing class TL_RC_Tests {
     dataInit();
     Test.startTest();
     TL_RC_SMS_Controls.init(5);
-    TL_RC_Logs_Controls.init(5);
+    TL_RC_Logs_Controls.init();
     Test.stopTest();
 
     Set<String> targetCronJobNames = new Set<String>{'Schedulable SMS Jobs', 'Get RingCentral Logs'};
