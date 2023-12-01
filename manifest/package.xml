@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>PatientJourneyNewPatientCreateCampaignMemberFromServiceAppointment</members> 
-        <name>Flow</name>
-    </types>
-    <types>
-        <members>RC_SMS_Job_Template__c</members> 
-        <members>RC_SMS_Sequence_Template__c</members> 
-        <name>CustomObject</name>
+        <members>TL_RC_Logs</members>
+        <members>TL_RC_Tests</members> 
+        <name>ApexClass</name>
     </types>
     <version>58.0</version>
 </Package>

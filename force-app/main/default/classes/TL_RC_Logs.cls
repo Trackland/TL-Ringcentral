@@ -31,18 +31,17 @@ public with sharing class TL_RC_Logs {
     List<RC_Call_Log__c> LogsToInsert = new List<RC_Call_Log__c>();
     List<RC_Call_Log__c> LogsToUpdate = new List<RC_Call_Log__c>();
     List<RC_Call_Log__c> AllLogs = new List<RC_Call_Log__c>();
-    Map<String, RC_Call_Log__c> LogsByNumberMap = new Map<String, RC_Call_Log__c>();
+    Map<String, List<RC_Call_Log__c>> LogsByNumberMap = new Map<String, List<RC_Call_Log__c>>();
   
     recursiveCallGetLogs(credName, dFrom, dTo, page, AllRecords);
     getExistingLogs(ExistingLogsByIdMap, AllRecords);
     createAllCallLogs(ExistingLogsByIdMap, AllRecords, LogsToInsert, LogsByNumberMap);
     connectLogToContactOrLead(LogsByNumberMap, LogsToUpdate);
-    insertLogsByBatches(callLogsToInsert, batchSize, completionFlag);    
     
     if(LogsToInsert.size() > 0) insert LogsToInsert;
     if(LogsToUpdate.size() > 0) update LogsToUpdate;
 
-    QueueuCreateLogHistories queueuCreateLogHistories = new QueueuCreateLogHistories(LogsByNumberMap, AllRecords);
+    QueueuCreateLogHistories queueuCreateLogHistories = new QueueuCreateLogHistories(LogsByNumberMap);
     System.enqueueJob(queueuCreateLogHistories);    
   }
 
@@ -76,6 +75,7 @@ public with sharing class TL_RC_Logs {
     try{
       String responseBody = TL_RC_Request.send(endpoint + dateInterval + paginated, '', credName, 'GET');
       Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+      System.debug(result);
       return result;
     } catch (Exception e) {
       throw new RingCentralException(e.getMessage());
@@ -97,7 +97,7 @@ public with sharing class TL_RC_Logs {
       }
   } 
 
-  public static void createAllCallLogs(Map<String, RC_Call_Log__c> ExistingLogsByIdMap, List<Object> records, List<RC_Call_Log__c> LogsToInsert, Map<String, RC_Call_Log__c> LogsByNumberMap){
+  public static void createAllCallLogs(Map<String, RC_Call_Log__c> ExistingLogsByIdMap, List<Object> records, List<RC_Call_Log__c> LogsToInsert, Map<String, List<RC_Call_Log__c>> LogsByNumberMap){
     List<String> ExistingLogIds = new List<String>(ExistingLogsByIdMap.keySet());
 
     for (Integer i = 0; i < records.size(); i++) {
@@ -117,11 +117,16 @@ public with sharing class TL_RC_Logs {
 
       String rawNbr = log.Direction__c == 'Inbound' ? (String)log.get('From_Phone_Number__c') : (String)log.get('To_Phone_Number__c');
       if(rawNbr == null) {
-        System.debug(log);
+        // System.debug(log);
         continue;
       }
-      String n = cleanNumber(rawNbr, true);        
-      LogsByNumberMap.put(n, log);
+      String n = cleanNumber(rawNbr, true);  
+      List<RC_Call_Log__c> logs = LogsByNumberMap.get(n);
+      if(logs == null){
+        logs = new List<RC_Call_Log__c>();
+        LogsByNumberMap.put(n, logs);
+      } 
+      logs.add(log);
     }
   }
 
@@ -146,36 +151,11 @@ public with sharing class TL_RC_Logs {
     return callLog;
   }
 
-  public static void insertLogsByBatches(List<RC_Call_Log__c> callLogsToInsert, Integer batchSize, Boolean completionFlag) {
-    // if (!callLogsToInsert.isEmpty()) {
-    //   List<List<RC_Call_Log__c>> callLogBatches = new List<List<RC_Call_Log__c>>();
-
-    //   for (Integer i = 0; i < callLogsToInsert.size(); i += batchSize) {
-    //     Integer endIndex = Math.min(i + batchSize, callLogsToInsert.size());
-    //     List<RC_Call_Log__c> batch = new List<RC_Call_Log__c>();
-        
-    //     for (Integer j = i; j < endIndex; j++) {
-    //         batch.add(callLogsToInsert[j]);
-    //     }
-        
-    //     callLogBatches.add(batch);
-    //   }
-
-    //   for (List<RC_Call_Log__c> batch : callLogBatches) {
-    //     try {
-    //         if (!Test.isRunningTest()) insert batch;
-    //     } catch (Exception e) {
-    //         System.debug(e.getMessage());
-    //     }
-    //   }
-    // }   
-  }  
-
   public static String isoFormatter(Date dateObject) {
     return dateObject.year() + '-' + String.valueOf(dateObject.month()).leftPad(2, '0') + '-' + String.valueOf(dateObject.day()).leftPad(2, '0'); 
   }  
 
-  public static void connectLogToContactOrLead(Map<String, RC_Call_Log__c> LogsByNumberMap, List<RC_Call_Log__c> LogsToUpdate){
+  public static void connectLogToContactOrLead(Map<String, List<RC_Call_Log__c>> LogsByNumberMap, List<RC_Call_Log__c> LogsToUpdate){
     Map<String, String> idMapByPhone = new Map<String, String>();
     Set<String> numberSet = LogsByNumberMap.keySet();
     List<String> numbers = new List<String>(numberSet);
@@ -202,8 +182,11 @@ public with sharing class TL_RC_Logs {
         System.debug('No numbers were found to search for contacts.');
         continue;
       }
-      List<List<SObject>> groups = [FIND :search IN PHONE FIELDS RETURNING Contact(Id,Phone,MobilePhone), Lead(Id,Phone,MobilePhone), Account(Id, Phone)];
+      List<List<SObject>> groups = [FIND :search IN PHONE FIELDS RETURNING Contact(Id,Phone,MobilePhone), Lead(Id,Phone,MobilePhone)]; //, Account(Id, Phone)
     
+      System.debug('Search: '+search);
+      System.debug(groups);
+
       for(List<SObject> items : groups){
         for(SObject item : items){
           Map<String, Object> values = item.getPopulatedFieldsAsMap();
@@ -213,22 +196,28 @@ public with sharing class TL_RC_Logs {
             else idMapByPhone.put(cleanNumber((String)values.get(fieldName), false), Id);
           }
         }
-      }    
+      }
     }
+
+    System.debug(idMapByPhone);
 
     for(String nbr : LogsByNumberMap.keySet()){
       Id Id = (Id)idMapByPhone.get(nbr);
+      System.debug('Id: '+Id + ' Number: '+nbr);
       if(Id == null) continue;
 
-      RC_Call_Log__c log = LogsByNumberMap.get(nbr);
-      if(log == null) continue;
-      
-      if(Id.getSObjectType() == Contact.SObjectType && (log.Contact__c == null || log.Contact__c != Id)) {
-        log.Contact__c = Id;
-        if(log.Id != null) LogsToUpdate.add(log);
-      } else if (Id.getSObjectType() == Lead.SObjectType && (log.Lead__c != null || log.Lead__c != Id)) {
-        log.Lead__c = Id;
-        if(log.Id != null) LogsToUpdate.add(log);
+      List<RC_Call_Log__c> logs = LogsByNumberMap.get(nbr);
+      for(RC_Call_Log__c log : logs){
+        if(log == null) continue;
+        // System.debug(Id.getSObjectType()+' | '+log.Contact__c+' | '+log.Contact__c);
+        if(Id.getSObjectType() == Contact.SObjectType && (log.Contact__c == null || log.Contact__c != Id)) {
+          // System.debug('Contact: '+Id);
+          log.Contact__c = Id;
+          if(log.Id != null) LogsToUpdate.add(log);
+        } else if (Id.getSObjectType() == Lead.SObjectType && (log.Lead__c != null || log.Lead__c != Id)) {
+          log.Lead__c = Id;
+          if(log.Id != null) LogsToUpdate.add(log);
+        }
       }
     }      
   } 
@@ -248,20 +237,18 @@ public with sharing class TL_RC_Logs {
   }
   
   public class QueueuCreateLogHistories implements Queueable {
-    Map<String, RC_Call_Log__c> LogsByNumberMap;
-    List<Object> AllLogs;
+    Map<String, List<RC_Call_Log__c>> LogsByNumberMap;
 
-    public QueueuCreateLogHistories(Map<String, RC_Call_Log__c> logsByNumberMap, List<Object> allLogs){
+    public QueueuCreateLogHistories(Map<String, List<RC_Call_Log__c>> logsByNumberMap){
       this.LogsByNumberMap = logsByNumberMap;
-      this.AllLogs = allLogs;
     }
     
     public void execute(QueueableContext context) {
-      createLogHistories(this.LogsByNumberMap, this.AllLogs);
+      createLogHistories(this.LogsByNumberMap);
     }
   } 
 
-  public static void createLogHistories(Map<String, RC_Call_Log__c> logsByNumberMap, List<Object> allLogs){
+  public static void createLogHistories(Map<String, List<RC_Call_Log__c>> logsByNumberMap){
     List<RC_Number_History__c> toInsert = new List<RC_Number_History__c>();
     List<RC_Number_History__c> toUpdate = new List<RC_Number_History__c>();
     List<Id> toUpdateIds = new List<Id>();
@@ -271,11 +258,22 @@ public with sharing class TL_RC_Logs {
     List<RC_Call_Log__c> AllRCLogs = new List<RC_Call_Log__c>();
     List<String> AllRCLogNumbers = new List<String>();
     
-    for(Object log : allLogs){
-      Map<String, Object> record = (Map<String, Object>) log;
-      logIds.add((String) record.get('id'));
+    for(String nbr : logsByNumberMap.keySet()){
+      List<RC_Call_Log__c> logs = logsByNumberMap.get(nbr);
+      for(RC_Call_Log__c log : logs){
+        if(log == null) continue;
+        logIds.add(log.Id);
+        AllRCLogs.add(log);
+      }
     }
-    RC_Call_Log__c[] logsFromThePrevProcess = [SELECT Id, Lead__c, Contact__c, Log_Id__c, Session_Id__c, Record_Url__c, Action__c, Direction__c, Duration__c, From_Location__c, From_Name__c, From_Phone_Number__c, Result__c, To_Name__c, To_Phone_Number__c, Type__c FROM RC_Call_Log__c WHERE Log_Id__c IN :logIds];    
+
+    System.debug(JSON.serialize(logsByNumberMap));
+    System.debug(logIds);
+
+    // RC_Call_Log__c[] logsFromThePrevProcess = [SELECT Id, Lead__c, Contact__c, Log_Id__c, Session_Id__c, Record_Url__c, Action__c, Direction__c, Duration__c, From_Location__c, From_Name__c, From_Phone_Number__c, Result__c, To_Name__c, To_Phone_Number__c, Type__c FROM RC_Call_Log__c WHERE Log_Id__c IN :logIds];    
+    RC_Call_Log__c[] logsFromThePrevProcess = [SELECT Id, Lead__c, Contact__c, Log_Id__c, Session_Id__c, Record_Url__c, Action__c, Direction__c, Duration__c, From_Location__c, From_Name__c, From_Phone_Number__c, Result__c, To_Name__c, To_Phone_Number__c, Type__c FROM RC_Call_Log__c];
+    System.debug(JSON.serialize(logsFromThePrevProcess));
+
     for(RC_Call_Log__c log : logsFromThePrevProcess){
       if(log.From_Phone_Number__c == null) continue;
       AllRCLogNumbers.add(log.From_Phone_Number__c);

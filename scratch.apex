@@ -1,6 +1,6 @@
-Date dateFrom = Date.today();
-Date dateTo = Date.today().addDays(1);
-TL_RC_Logs.getLogs('Production', dateFrom.addDays(-3), dateTo, 1);
+Date dateFrom = Date.today().addDays(-5);
+Date dateTo = Date.today().addDays(0);
+TL_RC_Logs.getLogs('Production', dateFrom, dateTo, 1);
 
 // RC_Call_Log__c[] items1 = [SELECT Id FROM RC_Call_Log__c];
 // RC_Number_History__c[] items2 = [SELECT Id FROM RC_Number_History__c];
@@ -8,6 +8,13 @@ TL_RC_Logs.getLogs('Production', dateFrom.addDays(-3), dateTo, 1);
 // System.debug(items2.size());
 // delete items1;
 // delete items2;
+
+// List<Contact> items = [SELECT Id, Account.Phone, MobilePhone FROM Contact WHERE Account.Phone != null AND MobilePhone = null];
+// System.debug(items.size());
+// for(Contact item : items){
+//   item.MobilePhone = item.Account.Phone;
+// }
+// update items;
 
 // TL_RingCentral_SMS.get();
 
