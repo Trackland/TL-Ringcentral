@@ -13,7 +13,7 @@ global class TL_RC_Logs_Controls implements Schedulable {
         }
     }
 
-    global static void init(Double Interval){
+    global static void init(){
         TL_RC_Logs_Controls scheduledProcess = new TL_RC_Logs_Controls();
         System.schedule(JobName, CRON_EXP, scheduledProcess);
     }      
