@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>RC_Call_Log__c</members>
-        <members>RC_Number_History__c</members> 
-        <name>CustomObject</name>
+        <members>User.Role__c</members>
+        <members>ServiceAppointment.Work_Type__c</members> 
+        <name>CustomField</name>
     </types>
     <version>58.0</version>
 </Package>
