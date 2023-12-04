@@ -47,12 +47,23 @@ public with sharing class TL_RC_Tests {
     Test.startTest();
     TL_RC_SMS_Controls.init(5);
     TL_RC_Logs_Controls.init();
+    TL_RC_SMS_ISync_Controls.init(300);
+    TL_RC_SMS_FSync_Controls.init();
     Test.stopTest();
 
-    Set<String> targetCronJobNames = new Set<String>{'Schedulable SMS Jobs', 'Get RingCentral Logs'};
-    List<CronTrigger> cronTriggers = [ SELECT Id FROM CronTrigger WHERE CronJobDetail.Name IN :targetCronJobNames LIMIT 2];
+    Set<String> targetCronJobNames = new Set<String>{'Schedulable SMS Jobs', 'Get RingCentral Logs', 'Schedulable SMS Logs FSync', 'Schedulable SMS Logs ISync'};
+    List<CronTrigger> cronTriggers = [ SELECT Id FROM CronTrigger WHERE CronJobDetail.Name IN :targetCronJobNames LIMIT 4];
     System.assertNotEquals(0, cronTriggers.size(), 'The scheduled job was not created');
-    System.assertEquals(2, cronTriggers.size());
+    System.assertEquals(4, cronTriggers.size());
+  }
+
+  @isTest
+  static void testSMSSync(){
+    dataInit();
+    Test.setMock(HttpCalloutMock.class, new GetSMSMock()); 
+    Test.startTest();
+    TL_RC_SMS_Sync.getSMSRecords(null, 'FSync', null, null);
+    Test.stopTest();
   }
 
   @isTest
@@ -77,6 +88,16 @@ public with sharing class TL_RC_Tests {
 
     RC_SMS_Job__c updatedJob = [SELECT Id, Status__c FROM RC_SMS_Job__c WHERE Id = :testJob.Id LIMIT 1];
     System.assertEquals('Complete', updatedJob.Status__c);
+  }
+
+  public class GetSMSMock implements HttpCalloutMock {
+    public HTTPResponse respond(HTTPRequest req) {
+      HttpResponse res = new HttpResponse();
+      res.setHeader('Content-Type', 'application/json');
+      res.setBody('{"uri":"https://platform.ringcentral.com/restapi/v1.0/account/2968449036/extension/2972050036/message-sync?messageType=SMS&syncType=FSync&recordCount=1","records":[{"uri":"https://platform.ringcentral.com/restapi/v1.0/account/2968449036/extension/2972050036/message-store/2048985300036","id":2048985300036,"to":[{"phoneNumber":"+15406645445"}],"from":{"phoneNumber":"+13854296821","name":"Spencer Rose","location":"Salt Lake City, UT"},"type":"SMS","creationTime":"2023-12-04T20:24:02.000Z","readStatus":"Read","priority":"Normal","attachments":[{"id":2048985300036,"uri":"https://media.ringcentral.com/restapi/v1.0/account/2968449036/extension/2972050036/message-store/2048985300036/content/2048985300036","type":"Text","contentType":"text/plain"}],"direction":"Outbound","availability":"Alive","subject":"Your appointment with Bull Oak Clinic is tomorrow! We cant wait to see you and help you on your journey to improved health. If you need to reschedule or have any questions, call us at +18043815060. See you soon!","messageStatus":"Delivered","smsSendingAttemptsCount":1,"conversationId":7784370116995079010,"conversation":{"id":"7784370116995079010","uri":"https://platform.ringcentral.com/restapi/v1.0/conversation/7784370116995079010"},"lastModifiedTime":"2023-12-04T20:24:04.170Z"}],"syncInfo":{"syncType":"FSync","syncToken":"AQEAAAAQAwAAAYw2gIbQBgAAAAEFAAABjDaRY_YTAAgAAAAAsSXidAkBChEZAAABjDaRT89HoBA6","syncTime":"2023-12-04T20:42:27.190Z","olderRecordsExist":true}}');
+      res.setStatusCode(200);
+      return res;
+    }
   }
   
   public class GetTokenMock implements HttpCalloutMock {

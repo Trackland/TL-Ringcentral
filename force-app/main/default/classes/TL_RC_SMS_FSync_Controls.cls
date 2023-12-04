@@ -3,24 +3,24 @@ global class TL_RC_SMS_FSync_Controls implements Schedulable {
     static String syncType = 'FSync';
     static String CRON_EXP = '0 0 3 * * ?';
 
-    global static void init() {
-        try {
-            TL_RC_SMS_ISync_Controls scheduler = new TL_RC_SMS_ISync_Controls();
-            System.schedule(JobName, CRON_EXP, scheduler);
-        } catch (Exception e) {
-            System.debug('Error in init FSync: ' + e.getMessage());
-        }
-    }
-    
     global void execute(SchedulableContext ctx) {    
         Date dateFrom = Date.today();
         Date dateTo = Date.today().addDays(1);
 
         try {
             TL_RC_SMS_Sync.GetMessageStoreRecords messageStoreRecords = new TL_RC_SMS_Sync.GetMessageStoreRecords('Production', syncType, dateFrom, dateTo);
-            System.enqueueJob(messageStoreRecords);
+            if (!Test.isRunningTest()) System.enqueueJob(messageStoreRecords);
         } catch(Exception e) {
             System.debug('Scheduler failed: '+ e.getMessage());
+        }
+    }
+
+    global static void init() {
+        try {
+            TL_RC_SMS_FSync_Controls scheduler = new TL_RC_SMS_FSync_Controls();
+            System.schedule(JobName, CRON_EXP, scheduler);
+        } catch (Exception e) {
+            System.debug('Error in init FSync: ' + e.getMessage());
         }
     }
 }

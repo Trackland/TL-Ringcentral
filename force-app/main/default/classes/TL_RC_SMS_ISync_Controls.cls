@@ -33,7 +33,7 @@ global class TL_RC_SMS_ISync_Controls implements Schedulable {
 
         try {
             TL_RC_SMS_Sync.GetMessageStoreRecords messageStoreRecords = new TL_RC_SMS_Sync.GetMessageStoreRecords('Production', syncType, dateFrom, dateTo);
-            System.enqueueJob(messageStoreRecords);
+            if (!Test.isRunningTest()) System.enqueueJob(messageStoreRecords);
             System.abortJob(jobId);
           }
           catch(Exception e) {
@@ -42,6 +42,6 @@ global class TL_RC_SMS_ISync_Controls implements Schedulable {
         }
         
         Integer IntervalInSeconds = 300;
-        TL_RC_SMS_Sync_Controls.init(IntervalInSeconds);
+        TL_RC_SMS_ISync_Controls.init(IntervalInSeconds);
     }
 }
