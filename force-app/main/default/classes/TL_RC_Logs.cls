@@ -117,7 +117,6 @@ public with sharing class TL_RC_Logs {
 
       String rawNbr = log.Direction__c == 'Inbound' ? (String)log.get('From_Phone_Number__c') : (String)log.get('To_Phone_Number__c');
       if(rawNbr == null) {
-        // System.debug(log);
         continue;
       }
       String n = cleanNumber(rawNbr, true);  
@@ -209,9 +208,7 @@ public with sharing class TL_RC_Logs {
       List<RC_Call_Log__c> logs = LogsByNumberMap.get(nbr);
       for(RC_Call_Log__c log : logs){
         if(log == null) continue;
-        // System.debug(Id.getSObjectType()+' | '+log.Contact__c+' | '+log.Contact__c);
         if(Id.getSObjectType() == Contact.SObjectType && (log.Contact__c == null || log.Contact__c != Id)) {
-          // System.debug('Contact: '+Id);
           log.Contact__c = Id;
           if(log.Id != null) LogsToUpdate.add(log);
         } else if (Id.getSObjectType() == Lead.SObjectType && (log.Lead__c != null || log.Lead__c != Id)) {
