@@ -1,6 +1,6 @@
 public with sharing class TL_RC_SMS_Sync {
 
-    public class GetMessageStoreRecords implements Queueable {
+    public class GetMessageStoreRecords implements Queueable, Database.AllowsCallouts {
         private String CredName;
         private String SyncType;
         private Date DateFrom;
