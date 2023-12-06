@@ -4,7 +4,7 @@ global class TL_RC_SMS_FSync_Controls implements Schedulable {
     static String CRON_EXP = '0 0 3 * * ?';
 
     global void execute(SchedulableContext ctx) {    
-        Date dateFrom = Date.today();
+        Date dateFrom = Date.today().addDays(-60);
         Date dateTo = Date.today().addDays(1);
 
         try {

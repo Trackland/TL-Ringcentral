@@ -149,18 +149,18 @@
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
     <enableReports>false</enableReports>
-    <enableSearch>true</enableSearch>
+    <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>RC SMS Record</label>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>RC SMS Thread</label>
     <nameField>
-        <displayFormat>SMS-{0000}</displayFormat>
+        <displayFormat>THREAD-{0000}</displayFormat>
         <label>Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>RC SMS Records</pluralLabel>
+    <pluralLabel>RC SMS Threads</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

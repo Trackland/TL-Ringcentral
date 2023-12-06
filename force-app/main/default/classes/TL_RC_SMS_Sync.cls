@@ -116,16 +116,32 @@ public with sharing class TL_RC_SMS_Sync {
           recordIds.add(String.valueOf(record.get('id')));
         }
   
-        RC_SMS_Record__c[] existingRecords = [SELECT Id, Contact__c, SMS_Id__c, Direction__c, Read_Status__c, Record_Url__c, From_Location__c, From_Phone__c, From_Name__c, To_Name__c, To_Phone__c, Subject__c, Creation_Time__c FROM RC_SMS_Record__c WHERE SMS_Id__c IN :recordIds];
-        
+        RC_SMS_Record__c[] existingRecords = [SELECT Id, Contact__c, RC_SMS_Thread__c, SMS_Id__c, Direction__c, Read_Status__c, Record_Url__c, From_Location__c, From_Phone__c, From_Name__c, To_Name__c, To_Phone__c, Subject__c, Creation_Time__c FROM RC_SMS_Record__c WHERE SMS_Id__c IN :recordIds];
+
         for (RC_SMS_Record__c existingRecord : existingRecords) {
             ExistingRecordsByIdMap.put(existingRecord.SMS_Id__c, existingRecord);
         }
     } 
 
     public static void createAllRecords(Map<String, RC_SMS_Record__c> ExistingRecordsByIdMap, List<Object> records, List<RC_SMS_Record__c> RecordsToInsert, Map<String, List<RC_SMS_Record__c>> RecordsByNumberMap){
+        List<String> conversationIdsAsString = new List<String>();
+
+        for (Object recordObj : records) {            
+            if (recordObj instanceof Map<String, Object>) {
+                Map<String, Object> record = (Map<String, Object>) recordObj;
+                Long conversationIdInt = (Long) record.get('conversationId');
+                
+                if (conversationIdInt != null) {
+                    conversationIdsAsString.add(String.valueOf(conversationIdInt));
+                }
+            } else {
+                System.debug('Unexpected type found: ' + recordObj);
+            }
+        }
+
         List<String> ExistingRecordsIds = new List<String>(ExistingRecordsByIdMap.keySet());
-    
+        List<RC_SMS_Thread__c> smsThreads = [SELECT Id, Conversation_Id__c FROM RC_SMS_Thread__c WHERE Conversation_Id__c IN :conversationIdsAsString];
+        
         for (Integer i = 0; i < records.size(); i++) {
           Object recordObj = records[i];
 
@@ -145,11 +161,11 @@ public with sharing class TL_RC_SMS_Sync {
 
           if (!exists) { 
             if (toItem.size() == 1) {
-                smsRecord = createMessageRecord(record, fromItem, toItem[0]);
+                smsRecord = createMessageRecord(record, fromItem, toItem[0], smsThreads);
                 RecordsToInsert.add(smsRecord);
             } else {
                 for (Map<String, Object> to : toItem) {
-                    smsRecord = createMessageRecord(record, fromItem, to);
+                    smsRecord = createMessageRecord(record, fromItem, to, smsThreads);
                     RecordsToInsert.add(smsRecord);
                 }
             }         
@@ -231,7 +247,19 @@ public with sharing class TL_RC_SMS_Sync {
         }
     }
 
-    public static RC_SMS_Record__c createMessageRecord(Map<String, Object> record, Map<String, Object> fromItem, Map<String, Object> toItem){
+    public static RC_SMS_Record__c createMessageRecord(Map<String, Object> record, Map<String, Object> fromItem, Map<String, Object> toItem, List<RC_SMS_Thread__c> smsRelatedThreads){
+        Long conversationIdInt = (Long) record.get('conversationId');
+        String conversationId = String.valueOf(conversationIdInt);
+        String relatedThreadId = findThreadById(smsRelatedThreads, conversationId);
+    
+        if (relatedThreadId == null) {
+            RC_SMS_Thread__c newThread = new RC_SMS_Thread__c (Conversation_Id__c = conversationId);
+            insert newThread;
+
+            relatedThreadId = newThread.Id;
+            smsRelatedThreads.add(newThread);
+        }
+    
         RC_SMS_Record__c smsRecord = new RC_SMS_Record__c(
           SMS_Id__c = String.valueOf(record.get('id')),
           Status__c = (String) record.get('messageStatus'),
@@ -244,10 +272,32 @@ public with sharing class TL_RC_SMS_Sync {
           To_Name__c = (String) toItem.get('name'),
           To_Phone__c = (String) toItem.get('phoneNumber'),
           Subject__c = (String) record.get('subject'),
-          Creation_Time__c = (Datetime) JSON.deserialize('"' + (String) record.get('creationTime') + '"', Datetime.class)
+          Creation_Time__c = (Datetime) JSON.deserialize('"' + (String) record.get('creationTime') + '"', Datetime.class),
+          RC_SMS_Thread__c = relatedThreadId
         );
     
         return smsRecord;
+    }
+
+    public static String findThreadById(List<RC_SMS_Thread__c> smsRelatedThreads, String targetConversationId) {
+        RC_SMS_Thread__c foundThread = null;
+        
+        if (smsRelatedThreads.size() > 0) {
+            for (RC_SMS_Thread__c thread : smsRelatedThreads) {
+                if (thread.Conversation_Id__c == targetConversationId) {
+                    foundThread = thread;
+                    break;
+                }
+            }
+
+            if (foundThread == null) {
+                return null;
+            }
+
+            return foundThread.Id;
+        }  else {
+            return null;
+        }
     }
 
     public static string cleanNumber(String rawNbr, Boolean removeOne){
