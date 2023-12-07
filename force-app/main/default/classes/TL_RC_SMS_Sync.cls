@@ -173,8 +173,6 @@ public with sharing class TL_RC_SMS_Sync {
           } else {
             smsRecord = ExistingRecordsByIdMap.get(String.valueOf(record.get('id')));
           }
-
-          System.debug(smsRecord);
     
           String rawNbr = smsRecord.Direction__c == 'Inbound' ? (String) smsRecord.get('From_Phone__c') : (String) smsRecord.get('To_Phone__c');
           if(rawNbr == null) {
