@@ -11,7 +11,7 @@ public with sharing class TL_RC_SMS {
     }
     
     public static void jobProcessing(String credName) {
-        List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, ClinicAddress__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC LIMIT 40];
+        List<RC_SMS_Job__c> rawJobs = [SELECT Id, AppointmentDate__c, TimeZone__c, ClinicAddress__c, FromAccount__c, FromPhone__c, Message__c, SMS_Sequence_Template__c, Send_At__c, Status__c, ToContact__c, ToPhone__c FROM RC_SMS_Job__c WHERE Status__c = 'Waiting' AND Send_At__c < :DateTime.now() ORDER BY Send_At__c ASC LIMIT 20];
 
         try {
                 Double rateLimit = 40;
@@ -71,7 +71,7 @@ public with sharing class TL_RC_SMS {
                 replacement = formatted;
             }
 
-            if (variableName == 'FromPhone__c') {
+            if (variableName == 'FromPhone__c' || variableName == 'ToPhone__c') {
                 String phoneNumber = (String) job.get(variableName);
                 String phoneNumberDigits = phoneNumber.replaceAll('\\D', '');
                 replacement = '+1' + phoneNumberDigits;
