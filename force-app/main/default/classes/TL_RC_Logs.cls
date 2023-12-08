@@ -2,7 +2,7 @@ public with sharing class TL_RC_Logs {
 
   private static Integer PerPage = 1000;
 
-  public class QueueuGetLogs implements Queueable {
+  public class QueueuGetLogs implements Queueable, Database.AllowsCallouts {
     private String CredName;
     private Date DateFrom;
     private Date DateTo;

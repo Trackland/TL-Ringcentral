@@ -46,7 +46,7 @@ public with sharing class TL_RC_Tests {
     dataInit();
     Test.startTest();
     TL_RC_SMS_Controls.init(5);
-    TL_RC_Logs_Controls.init();
+    TL_RC_Logs_Controls.init(5);
     TL_RC_SMS_ISync_Controls.init(300);
     TL_RC_SMS_FSync_Controls.init();
     Test.stopTest();

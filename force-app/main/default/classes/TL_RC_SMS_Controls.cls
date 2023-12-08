@@ -37,7 +37,7 @@ global with sharing class TL_RC_SMS_Controls implements Schedulable {
             System.abortJob(jobId);
         }
         
-        Integer IntervalInSeconds = 10;
+        Integer IntervalInSeconds = 120;
         TL_RC_SMS_Controls.init(IntervalInSeconds);
     }
 }
