@@ -150,9 +150,7 @@ public with sharing class TL_RC_Tests {
     cred.JWT__c = 'osldkjiflasdl';
 
     RC_SMS_Job__c newJob = new RC_SMS_Job__c();
-    newJob.FromAccount__c = 'Tampa';
     newJob.FromPhone__c = '+13854296821';
-    newJob.ToContact__c = 'Will Johnson';
     newJob.ToPhone__c = '+18043815513';
     newJob.Send_At__c = Datetime.now().addDays(-10);
     newJob.AppointmentDate__c = Datetime.newInstance(2023, 12, 7, 10, 0, 0);

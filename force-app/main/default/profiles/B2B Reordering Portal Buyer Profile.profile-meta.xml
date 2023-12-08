@@ -213,7 +213,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>RC_SMS_Job__c.FromAccount__c</field>
+        <field>RC_SMS_Job__c.From_Account__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -253,7 +253,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>RC_SMS_Job__c.ToContact__c</field>
+        <field>RC_SMS_Job__c.To_Contact__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>

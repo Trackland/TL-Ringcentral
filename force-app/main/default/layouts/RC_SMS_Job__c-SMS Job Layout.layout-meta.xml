@@ -29,7 +29,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>FromAccount__c</field>
+                <field>From_Account__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -49,7 +49,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>ToContact__c</field>
+                <field>To_Contact__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

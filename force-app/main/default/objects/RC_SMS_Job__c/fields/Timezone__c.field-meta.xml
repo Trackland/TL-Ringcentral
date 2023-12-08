@@ -4,6 +4,7 @@
     <externalId>false</externalId>
     <label>Time Zone</label>
     <length>99</length>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>
