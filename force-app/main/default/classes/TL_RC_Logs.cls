@@ -346,6 +346,7 @@ public with sharing class TL_RC_Logs {
   }
 
   public static void addServiceAppointments(List<RC_Number_History__c> AllHistories){
+    List<WorkType> careCoordinatorWorkType = [SELECT Id FROM WorkType WHERE Name = 'Care Coordinator Interview'];
     Set<Id> contactIds = new Set<Id>();
     Set<Id> leadIds = new Set<Id>();
     for(RC_Number_History__c history : AllHistories){
@@ -353,7 +354,7 @@ public with sharing class TL_RC_Logs {
       if(history.Lead__c != null) leadIds.add(history.Lead__c);
     }
 
-    ServiceAppointment[] appts = [SELECT Id, ContactId FROM ServiceAppointment WHERE ContactId IN :contactIds Order By Status];
+    ServiceAppointment[] appts = [SELECT Id, ContactId FROM ServiceAppointment WHERE ContactId IN :contactIds AND WorkTypeId = :careCoordinatorWorkType[0].Id Order By Status];
 
     Map<Id, ServiceAppointment> apptsByContactIdMap = new Map<Id, ServiceAppointment>();
     for(ServiceAppointment appt : appts){

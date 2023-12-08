@@ -158,6 +158,11 @@ public with sharing class TL_RC_Tests {
     newJob.SMS_Sequence_Template__c = null;
     newJob.Status__c = 'Waiting';
 
+    WorkType newWorkType = new WorkType();
+    newWorkType.Name = 'Care Coordinator Interview';
+    newWorkType.EstimatedDuration = 30;
+
+    insert newWorkType;
     insert newJob;
 
     List<RC_Call_Log__c> callLogsToInsert = new List<RC_Call_Log__c>();
