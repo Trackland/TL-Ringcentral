@@ -158,8 +158,7 @@ public with sharing class TL_RC_Tests {
     newJob.FromPhone__c = '+13854296821';
     newJob.ToPhone__c = '+18043815513';
     newJob.Send_At__c = Datetime.now().addDays(-10);
-    newJob.AppointmentDate__c = Datetime.newInstance(2023, 12, 7, 10, 0, 0);
-    newJob.Message__c = 'Thank you for scheduling your visit at Bull Oak Clinic! Your appointment is confirmed for {{AppointmentDate__c}}. We look forward to assisting you with your health needs. If you have any questions, feel free to reply or call us at {{FromPhone__c}}. See you soon!';
+    newJob.Message__c = 'Thank you for scheduling your visit at Bull Oak Clinic! Your appointment is confirmed for. We look forward to assisting you with your health needs. If you have any questions, feel free to reply or call us at {{FromPhone__c}}. See you soon!';
     newJob.SMS_Sequence_Template__c = null;
     newJob.Status__c = 'Waiting';
     insert newJob;

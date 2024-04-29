@@ -172,7 +172,7 @@ public with sharing class TL_RC_Logs {
 
   public static void connectLogToContactOrLead(Map<String, List<RC_Call_Log__c>> LogsByNumberMap, List<RC_Call_Log__c> LogsToUpdate) {
     Map<String, String> idMapByPhone = new Map<String, String>();
-    Set<String> numberSet = LogsByNumberMap.keySet()
+    Set<String> numberSet = LogsByNumberMap.keySet();
     List<List<String>> chunks = new List<List<String>>();
     List<String> chunk = new List<String>();
     Integer chunkSize = 299;
@@ -217,7 +217,7 @@ public with sharing class TL_RC_Logs {
 
     System.debug(idMapByPhone);
 
-    for (String nbr : numberSet) {
+    for (String nbr : LogsByNumberMap.keySet()) {
       Id Id = (Id) idMapByPhone.get(nbr);
       System.debug('Id: ' + Id + ' Number: ' + nbr);
       if (Id == null)

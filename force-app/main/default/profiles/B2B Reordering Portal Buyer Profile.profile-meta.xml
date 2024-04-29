@@ -203,11 +203,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>RC_SMS_Job__c.AppointmentDate__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>RC_SMS_Job__c.From_Account__c</field>
         <readable>false</readable>
     </fieldPermissions>

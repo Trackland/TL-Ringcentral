@@ -5,7 +5,7 @@
       "default": true,
       "package": "TL_RingCentral",
       "versionName": "ver 3.70",
-      "versionNumber": "3.70.0.NEXT",
+      "versionNumber": "3.70.1.NEXT",
       "versionDescription": ""
     }
   ],
@@ -13,6 +13,8 @@
   "sourceApiVersion": "55.0",
   "packageAliases": {
     "TL_RingCentral": "0HoRQ00000000RR0AY",
-    "TL_RingCentral@3.70.0-4": "04tRQ0000001K6LYAU" 
+    "TL_RingCentral@3.70.0-4": "04tRQ0000001K6LYAU",
+    "TL_RingCentral@3.70.1-1": "04tRQ0000001KW9YAM",
+    "TL_RingCentral@3.70.1-2": "04tRQ0000001KXlYAM"
   }
 }
