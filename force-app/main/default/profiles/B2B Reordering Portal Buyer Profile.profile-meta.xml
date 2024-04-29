@@ -178,11 +178,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>RC_Number_History__c.Service_Appointment__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>RC_SMS_Job_Template__c.Active__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -266,21 +261,6 @@
         <field>RC_SMS_Sequence_Template__c.Number_of_Jobs__c</field>
         <readable>false</readable>
     </fieldPermissions>
-    <layoutAssignments>
-        <layout>RC_Call_Log__c-Call Log Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>RC_Number_History__c-RC Number History Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>RC_SMS_Job_Template__c-SMS Job Template Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>RC_SMS_Job__c-SMS Job Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>RC_SMS_Sequence_Template__c-SMS Sequence Layout</layout>
-    </layoutAssignments>
     <tabVisibilities>
         <tab>RC_Call_Log__c</tab>
         <visibility>DefaultOn</visibility>

@@ -148,7 +148,7 @@
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>true</enableReports>
+    <enableReports>false</enableReports>
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
@@ -156,7 +156,7 @@
     <label>RC SMS Job</label>
     <nameField>
         <displayFormat>RCJ-{000000}</displayFormat>
-        <label>Name</label>
+        <label>RC SMS Job Name</label>
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>RC SMS Jobs</pluralLabel>
