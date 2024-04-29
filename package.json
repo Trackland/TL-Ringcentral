@@ -1,0 +1,27 @@
+{
+  "name": "tl-ringcentral",
+  "version": "1.0.0",
+  "description": "Add a brief description of this project here, in Markdown format. It will be shown on the main page of the project's GitHub repository.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"./force-app/main/default/classes/**/*.cls\"",
+    "manifest": "sf force:source:manifest:create --source-dir ./force-app/main/default/** -d ./manifest",
+    "version": "sf package:version:create -w 15 -p 0HoRQ00000000RR0AY -x -c -v DevHub",
+    "promote": "sf package:version:promote -p $V -v DevHub"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trackland/TL-Ringcentral.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Trackland/TL-Ringcentral/issues"
+  },
+  "homepage": "https://github.com/Trackland/TL-Ringcentral#readme",
+  "devDependencies": {
+    "prettier-plugin-apex": "^2.1.3"
+  }
+}
