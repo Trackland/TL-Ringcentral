@@ -30,8 +30,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"./force-app/main/default/classes/**/*.cls\"",
     "manifest": "sf force:source:manifest:create --source-dir ./force-app/main/default/** -d ./manifest",
-    "version": "sf package:version:create -w 15 -p 0HoRQ00000000RR0AY -x -c -v DevHub",
-    "promote": "sf package:version:promote -p $V -v DevHub"
+    "promote": "OUTPUT=$(sf package:version:create -w 15 -p 0HoRQ00000000RR0AY -x -c -v DevHub) && VERSION_ID=$(echo $OUTPUT | cut -d':' -f2 | head -n 1) && VERSION_ID2=$(echo $VERSION_ID | cut -d ' ' -f1) && sf package:version:promote -p $VERSION_ID2 -v DevHub"
   },
   "keywords": [],
   "author": "",
